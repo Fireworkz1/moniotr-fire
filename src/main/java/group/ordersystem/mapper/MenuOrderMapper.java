@@ -23,7 +23,9 @@ public interface MenuOrderMapper {
      */
     @Delete("delete from menu_order where order_id=#{order_id}")
     void deleteMealsInOrder(Integer order_id);
-
+    /**
+     * 查询全部菜品订单关系
+     */
     @Select("select * from menu_order")
     List<Menu_Order> selectMenuOrder();
 }

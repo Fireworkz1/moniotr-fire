@@ -57,7 +57,11 @@ public interface MenuMapper {
      */
     @Delete("delete from menu where meal_id = #{meal_id}")
     void deleteMealByMealId(Integer meal_id);
-
+    /**
+     * 根据菜品id查询菜品名
+     * @param meal_id
+     * @return
+     */
     @Select("select meal_name from menu where meal_id = #{meal_id}")
     String getNameByMealId(Integer meal_id);
 }

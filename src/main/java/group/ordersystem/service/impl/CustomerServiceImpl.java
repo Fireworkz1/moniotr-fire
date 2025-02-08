@@ -52,7 +52,7 @@ public class CustomerServiceImpl implements CustomerService {
         User user = JWTUtil.getCurrentUser();
         //数据库查询到orders表中的所有订单数据
         List<Orders> orders = orderMapper.getOrdersByUserId(user.getUser_id());
-        //返回值类型的变量
+        //new一个GetOrdersRes类型的变量
         List<GetOrdersRes> ordersResList = new ArrayList<>();
         //往返回值类型的变量里添加数据
         for (Orders o : orders) {
@@ -68,13 +68,12 @@ public class CustomerServiceImpl implements CustomerService {
             ordersRes.setStatus(o.getStatus());
             ordersRes.setDeliver_id(o.getDeliver_id());
             ordersRes.setDeliver_time(o.getDeliver_time());
-
             ordersRes.setMenus(menu);
-
             ordersResList.add(ordersRes);
         }
 
-        return new UniversalResponse<>(ResponseEnum.SUCCESS.getCode(), ResponseEnum.SUCCESS.getMsg(), ordersResList);
+        return new UniversalResponse<>(ResponseEnum.SUCCESS.getCode(),
+                ResponseEnum.SUCCESS.getMsg(), ordersResList);
     }
 
     /**
@@ -85,11 +84,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public UniversalResponse<?> insertOrder(PostOrderForm postOrderForm) {
         //加载postOderForm对象数据
+
         Integer status = OrderStatusEnum.CREATED.getCode();
         Integer customer_id = JWTUtil.getCurrentUser().getUser_id();
         String destination = postOrderForm.getDestination();
-        Integer order_price = 0;
         List<Integer> meals = postOrderForm.getMeals();
+        Integer order_price = 0;
+
         //判断地址是否为空
         if (destination == null) {
             throw new ResponseException(ResponseEnum.PARAM_IS_BLANK.getCode(), ResponseEnum.PARAM_IS_BLANK.getMsg());
@@ -99,7 +100,6 @@ public class CustomerServiceImpl implements CustomerService {
         for (Integer meal_id : meals) {
             order_price += menuMapper.getMealPriceByMealId(meal_id);
         }
-
         Orders newOrders = new Orders(status, customer_id, destination, order_price);
         //添加订单信息（除订单中的菜品信息）
         orderMapper.insertOrderDB(newOrders);

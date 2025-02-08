@@ -26,7 +26,6 @@ public interface OrderMapper {
     @Options(useGeneratedKeys = true, keyProperty = "order_id", keyColumn = "order_id")
     void insertOrderDB(Orders orders);
 
-
     /**
      * 根据订单id查询订单数据
      *
