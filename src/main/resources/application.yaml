@@ -1,14 +1,14 @@
 server:
-  port: 9900
+  port: 9500
 
 
 spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://rm-bp1x549zb99mustj1vo.mysql.rds.aliyuncs.com:3306/ordersystem?SetTimezone=CTS
-      username: root
-      password: H62J$9(iw8L93J_ng2H81
+      url: jdbc:mysql://8.130.20.137:3306/monitor-fire?SetTimezone=CTS
+      username: user1
+      password: fireworkz0518A6400_
 
 logging:
   level:

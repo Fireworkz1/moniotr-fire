@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>group</groupId>
-    <artifactId>OrderSystem</artifactId>
+    <artifactId>fire-monitor</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>OrderSystem</name>
     <description>OrderSystem</description>
@@ -20,6 +20,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version> <!-- 版本号可能不同 -->
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.7</version> <!-- 替换为最新版本 -->
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

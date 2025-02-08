@@ -1,0 +1,77 @@
+package group.fire_monitor.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import group.fire_monitor.mapper.UserMapper;
+import group.fire_monitor.pojo.User;
+import group.fire_monitor.service.UserService;
+import group.fire_monitor.util.JWTUtil;
+import group.fire_monitor.util.enums.ResponseEnum;
+import group.fire_monitor.util.response.ResponseException;
+import group.fire_monitor.util.response.UniversalResponse;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+@Service
+public class UserServicelmpl extends ServiceImpl<UserMapper, User> implements UserService {
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private OrderMapper orderMapper;
+    @Resource
+    private MenuMapper menuMapper;
+    @Resource
+    private MenuOrderMapper menuOrderMapper;
+    /**
+     * 用户登录
+     *
+     * @param loginForm 登录表单
+     * @return
+     */
+    @Override
+    public UniversalResponse<TokenRes> login(LoginForm loginForm) {
+        User user = userMapper.getUserByAccount(loginForm.getAccount());
+        if (user == null) {
+            throw new ResponseException(ResponseEnum.USER_LOGIN_ERROR.getCode(), ResponseEnum.USER_LOGIN_ERROR.getMsg());
+        }
+        if (!user.getPassword().equals(loginForm.getPassword())) {
+            throw new ResponseException(ResponseEnum.USER_LOGIN_ERROR.getCode(), ResponseEnum.USER_LOGIN_ERROR.getMsg());
+        }
+        // 用户名、密码正确
+        // 生成token
+        String token;
+        token = JWTUtil.createToken(loginForm.getAccount());
+        return new UniversalResponse<>(ResponseEnum.SUCCESS.getCode(), ResponseEnum.SUCCESS.getMsg(), new TokenRes(token, user.getPermissionLevel()));
+    }
+
+    /**
+     * 用户注册
+     *
+     * @param registerForm
+     * @return
+     */
+    @Override
+    public UniversalResponse<?> register(RegisterForm registerForm) {
+        User newUser = new User();
+        newUser.setId(null);
+        newUser.setName(registerForm.getUser_name());
+        newUser.setPermissionLevel(registerForm.getIdentity());
+        newUser.setAccount(registerForm.getAccount());
+        newUser.setPassword(registerForm.getPassword());
+
+        if (Strings.isBlank(newUser.getName()) || Strings.isBlank(newUser.getPassword()) || Strings.isBlank(newUser.getAccount())) {
+            throw new ResponseException(ResponseEnum.PARAM_IS_INVALID.getCode(), ResponseEnum.PARAM_IS_INVALID.getMsg());
+        }
+
+        User user = userMapper.getUserByAccount(newUser.getAccount());
+        if (user != null) {
+            throw new ResponseException(ResponseEnum.USER_ACCOUNT_EXISTS.getCode(), ResponseEnum.USER_ACCOUNT_EXISTS.getMsg());
+        }
+
+        userMapper.insertUser(newUser);
+
+        return new UniversalResponse<>(ResponseEnum.SUCCESS.getCode(), ResponseEnum.SUCCESS.getMsg());
+    }
+
+}
