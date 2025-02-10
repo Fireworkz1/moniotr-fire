@@ -96,7 +96,13 @@ public class UserController {
             group.setGroupLeaderId(createGroupForm.getGroupLeaderId());
             group.setName(createGroupForm.getGroupName());
             group.setDefaultPermissionLevel(createGroupForm.getPermissionLevel());
-            groupMapper.insert(group);
+            Integer groupId=groupMapper.insert(group);
+            RelationGroupUser groupUser=new RelationGroupUser();
+            groupUser.setGroup_id(groupId);
+            for(Integer userId:createGroupForm.getUserIds()){
+                groupUser.setUser_id(userId);
+                groupUserMapper.insert(groupUser);
+            }
             return new UniversalResponse<>(200,"success");
         }catch (Exception e){
             e.printStackTrace();
