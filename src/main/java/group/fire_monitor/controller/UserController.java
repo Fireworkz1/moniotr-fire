@@ -92,6 +92,11 @@ public class UserController {
             return new UniversalResponse<>(500,"权限不足");
         }
         try{
+            QueryWrapper<Group> wrapper=new QueryWrapper<>();
+            wrapper.eq("name",createGroupForm.getGroupName());
+            if(groupMapper.selectList(wrapper)!=null){
+                return new UniversalResponse<>(500,"名字重复");
+            }
             Group group=new Group();
             group.setGroupLeaderId(createGroupForm.getGroupLeaderId());
             group.setName(createGroupForm.getGroupName());
