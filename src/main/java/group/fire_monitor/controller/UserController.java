@@ -19,6 +19,7 @@ import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -86,6 +87,7 @@ public class UserController {
     * */
     @PostMapping("createGroup")
     @ApiOperation("创建分组")
+    @Transactional
     @ResponseBody
     public  UniversalResponse<?> createGroup(@RequestBody CreateGroupForm createGroupForm){
         if(!Objects.equals(JWTUtil.getCurrentUser().getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel())){
@@ -94,17 +96,20 @@ public class UserController {
         try{
             QueryWrapper<Group> wrapper=new QueryWrapper<>();
             wrapper.eq("name",createGroupForm.getGroupName());
-            if(groupMapper.selectList(wrapper)!=null){
+            if(!groupMapper.selectList(wrapper).isEmpty()){
                 return new UniversalResponse<>(500,"名字重复");
             }
             Group group=new Group();
             group.setGroupLeaderId(createGroupForm.getGroupLeaderId());
             group.setName(createGroupForm.getGroupName());
             group.setDefaultPermissionLevel(createGroupForm.getPermissionLevel());
-            Integer groupId=groupMapper.insert(group);
+
+            groupMapper.insert(group);
+            Integer groupId=group.getId();
             RelationGroupUser groupUser=new RelationGroupUser();
             groupUser.setGroup_id(groupId);
             for(Integer userId:createGroupForm.getUserIds()){
+                groupUser.setId(null);
                 groupUser.setUser_id(userId);
                 groupUserMapper.insert(groupUser);
             }
@@ -131,12 +136,12 @@ public class UserController {
                 relationGroupUser.setUser_id(userId);
                 groupUserMapper.insert(relationGroupUser);
             }
+            return new UniversalResponse<>().success();
         }catch (Exception e){
             e.printStackTrace();
             return new UniversalResponse<>(500,e.getMessage());
         }
 
-        return null;
     }
 
     /*

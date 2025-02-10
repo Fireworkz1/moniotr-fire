@@ -30,4 +30,9 @@ public class UniversalResponse<T> {
         this.data=data;
         return this;
     }
+    public UniversalResponse<?> success(){
+        this.code=200;
+        this.msg="success";
+        return this;
+    }
 }
