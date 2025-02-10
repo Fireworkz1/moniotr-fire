@@ -31,6 +31,10 @@ public class JWTInterceptor implements HandlerInterceptor {
             System.out.println("OPTIONS放行");
             return true;
         }
+        String requestURI = request.getRequestURI();
+        if (requestURI.contains("/doc.html") ||requestURI.contains("/favicon.ico") || requestURI.contains("/v2/api-docs") || requestURI.contains("/swagger-resources") || requestURI.contains("/webjars")) {
+            return true; // 放行Swagger UI的请求
+        }
 
         // 检查handler是否是HandlerMethod的实例
         if (handler instanceof HandlerMethod) {
@@ -48,14 +52,14 @@ public class JWTInterceptor implements HandlerInterceptor {
             throw new ResponseException(ResponseEnum.USER_TOKEN_ERROR.getCode(), ResponseEnum.USER_TOKEN_ERROR.getMsg());
         }
 
-        String account;
+        Integer id;
         try {
-            account = JWT.decode(token).getAudience().get(0);
+            id = Integer.valueOf(JWT.decode(token).getAudience().get(0));
         } catch (JWTDecodeException e) {
             throw new ResponseException(ResponseEnum.USER_TOKEN_ERROR.getCode(), ResponseEnum.USER_TOKEN_ERROR.getMsg());
         }
 
-        User user = userMapper.getUserByAccount(account);
+        User user = userMapper.selectById(id);
         if (user == null) {
             throw new ResponseException(ResponseEnum.USER_TOKEN_ERROR.getCode(), ResponseEnum.USER_TOKEN_ERROR.getMsg());
         }

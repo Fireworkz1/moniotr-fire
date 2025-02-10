@@ -1,5 +1,7 @@
 package group.fire_monitor.mapper;
 
+
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import group.fire_monitor.pojo.User;
 import org.apache.ibatis.annotations.Insert;

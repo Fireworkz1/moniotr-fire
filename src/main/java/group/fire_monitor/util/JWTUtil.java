@@ -37,7 +37,7 @@ public class JWTUtil {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader("token");
         if (Strings.isNotBlank(token)) {
-            return staticUserMapper.getUserByAccount(JWT.decode(token).getAudience().get(0));
+            return staticUserMapper.selectById(Integer.valueOf(JWT.decode(token).getAudience().get(0)));
         }
         throw new ResponseException(401, "未持有token");
     }

@@ -11,6 +11,6 @@ public class User {
     private Integer permissionLevel;
     private String  account;
     private String  password;
-    private Integer  tel;
+    private String  tel;
     private String  email;
 }

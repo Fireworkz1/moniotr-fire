@@ -19,4 +19,15 @@ public class UniversalResponse<T> {
         this.msg = msg;
         this.data = data;
     }
+
+    public UniversalResponse() {
+
+    }
+
+    public UniversalResponse<T> success(T data){
+        this.code=200;
+        this.msg="success";
+        this.data=data;
+        return this;
+    }
 }
