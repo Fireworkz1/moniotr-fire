@@ -35,4 +35,10 @@ public class UniversalResponse<T> {
         this.msg="success";
         return this;
     }
+
+    public UniversalResponse<?> fail(Exception e){
+        this.code=500;
+        this.msg=e.getMessage();
+        return this;
+    }
 }
