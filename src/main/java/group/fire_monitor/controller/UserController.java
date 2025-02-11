@@ -126,6 +126,14 @@ public class UserController {
     @ApiOperation("更改分组中人员")
     @ResponseBody
     public  UniversalResponse<?> changeGroup(@RequestBody ChangeGroupMemberForm changeGroupMemberForm){
+        User currentUser=JWTUtil.getCurrentUser();
+        if (groupMapper.selectById(changeGroupMemberForm.getGroupId())==null)
+            return new UniversalResponse<>(500,"不存在分组");
+        Group group=groupMapper.selectById(changeGroupMemberForm.getGroupId());
+        if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))&&
+            group.getGroupLeaderId()!=currentUser.getId()){
+            return new UniversalResponse<>(500,"您没有权限修改分组");
+        }
         try{
             QueryWrapper<RelationGroupUser> wrapper=new QueryWrapper<>();
             wrapper.eq("group_id",changeGroupMemberForm.getGroupId());

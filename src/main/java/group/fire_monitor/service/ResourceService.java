@@ -1,17 +1,20 @@
 package group.fire_monitor.service;
 
 import group.fire_monitor.pojo.Resource;
+import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.util.response.UniversalResponse;
+
+import java.util.List;
 
 public interface ResourceService {
     UniversalResponse<?> testPing(Resource resource);
 
-    UniversalResponse<?> addServer(Resource resource);
+    UniversalResponse<?> addServer(ResourceCreateForm resourceCreateForm);
 
     UniversalResponse<?> deleteServer(Integer resourceId);
     UniversalResponse<?> selectServer(String str);
 
-    UniversalResponse<?> addSoftware(Resource resource);
+    UniversalResponse<?> addSoftware(ResourceCreateForm resourceCreateForm);
 
     UniversalResponse<?> deleteSoftware(Integer resourceId);
 
@@ -19,4 +22,8 @@ public interface ResourceService {
     UniversalResponse<?> selectSoftware(String str);
 
     UniversalResponse<?> testExporter(Integer type);
+
+    List<Integer> checkPermission(List<Integer> resourceIds);
+
+    void checkPermission(Integer resourceId) throws Exception;
 }

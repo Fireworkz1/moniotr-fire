@@ -1,6 +1,7 @@
 package group.fire_monitor.controller;
 
 import group.fire_monitor.pojo.Resource;
+import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
@@ -30,11 +31,11 @@ public class ResourceController {
     @PostMapping("/addServer")
     @ResponseBody
     @ApiOperation("添加服务器资源")
-    public UniversalResponse<?> addServer(@RequestBody Resource resource) {
+    public UniversalResponse<?> addServer(@RequestBody ResourceCreateForm resourceCreateForm) {
         //提供name，ip，描述，账号，密码
-        UniversalResponse<?> response= resourceService.testPing(resource);
+        UniversalResponse<?> response= resourceService.testPing(resourceCreateForm.getResource());
         if(response.getCode()==500)return response;
-        return resourceService.addServer(resource);
+        return resourceService.addServer(resourceCreateForm);
     }
     /*
      * 服务器添加到资源列表
@@ -42,7 +43,7 @@ public class ResourceController {
     @PostMapping("/selectServer")
     @ResponseBody
     @ApiOperation("获取服务器资源")
-    public UniversalResponse<?> selectServer(@RequestParam String str) {
+    public UniversalResponse<?> selectServer(@RequestParam(required = false) String str) {
 
         return resourceService.selectServer(str);
     }
@@ -53,6 +54,7 @@ public class ResourceController {
     @ResponseBody
     @ApiOperation("删除服务器资源")
     public UniversalResponse<?> deleteServer(@RequestParam Integer id) {
+
         return resourceService.deleteServer(id);
     }
     /*
@@ -71,10 +73,11 @@ public class ResourceController {
     @PostMapping("/addSoftware")
     @ResponseBody
     @ApiOperation("添加软件资源")
-    public UniversalResponse<?> addSoftware(@RequestBody Resource resource) {
+    public UniversalResponse<?> addSoftware(@RequestBody ResourceCreateForm resourceCreateForm) {
         //提供第二资源类型，端口，描述，名字.ip
-        if(testdSoftware(resource).getCode()==500)return testdSoftware(resource);
-        return resourceService.addSoftware(resource);
+        UniversalResponse<?> response=testdSoftware(resourceCreateForm.getResource());
+        if(response.getCode()==500)return response;
+        return resourceService.addSoftware(resourceCreateForm);
     }
     /*
     * 将软件资源从资源列表删除，并删除prometheus监测
@@ -83,6 +86,7 @@ public class ResourceController {
     @ResponseBody
     @ApiOperation("删除软件资源")
     public UniversalResponse<?> deleteSoftware(@RequestParam Integer id) {
+
         return resourceService.deleteSoftware(id);
     }
 
@@ -91,8 +95,8 @@ public class ResourceController {
      * */
     @PostMapping("/selectSoftware")
     @ResponseBody
-    @ApiOperation("删除软件资源")
-    public UniversalResponse<?> selectSoftware(@RequestParam String str) {
+    @ApiOperation("查询软件资源")
+    public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str) {
         return resourceService.selectSoftware(str);
     }
 

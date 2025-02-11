@@ -13,6 +13,7 @@ public class ExceptionResHandler {
 
     @ExceptionHandler(Exception.class)
     public UniversalResponse<?> handler(Exception e) {
+        e.printStackTrace();
         return new UniversalResponse<>(ResponseEnum.SERVER_BUSY.getCode(), ResponseEnum.SERVER_BUSY.getMsg());
     }
 }

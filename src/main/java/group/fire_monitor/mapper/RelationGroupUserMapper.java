@@ -12,4 +12,6 @@ import java.util.List;
 public interface RelationGroupUserMapper extends BaseMapper<RelationGroupUser> {
     @Select("SELECT u.* FROM basic_user u JOIN relation_user_group rug ON u.id = rug.user_id WHERE rug.group_id = #{groupId}")
     List<User> selectUsersByGroupId(Integer groupId);
+
+
 }

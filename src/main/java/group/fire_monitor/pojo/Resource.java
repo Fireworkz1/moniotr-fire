@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @TableName("resource_info")
@@ -17,11 +20,12 @@ public class Resource {
     private String resourceIp;
     private String resourcePort;
     private String resourceTypeSecond;
-    private Timestamp addedTime;
+    private Date addedTime;
     private Integer resourceMonitorOn;
     private String resourceDescription;
     private Integer resourceUp;
     private String hardResourceUsername;
     private String hardResourcePassword;
+    private Integer resourceCreaterId;
 
 }
