@@ -12,6 +12,9 @@ import group.fire_monitor.pojo.RelationGroupResource;
 import group.fire_monitor.pojo.RelationGroupUser;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
+import group.fire_monitor.pojo.res.SoftwareDetailRes;
+import group.fire_monitor.prometheus.PrometheusQueryExecutor;
+import group.fire_monitor.prometheus.PrometheusResponse;
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.util.JWTUtil;
 import group.fire_monitor.util.enums.PermissionLevelEnum;
@@ -37,6 +40,8 @@ public class ResourceServiceImpl implements ResourceService {
     RelationGroupResourceMapper relationGroupResourceMapper;
     @Autowired
     RelationGroupUserMapper relationGroupUserMapper;
+    @Autowired
+    PrometheusQueryExecutor prometheusQueryExecutor;
 
     @Override
     public UniversalResponse<?> testPing(Resource resource) {
@@ -254,5 +259,31 @@ public class ResourceServiceImpl implements ResourceService {
                 .filter(userInGroupIds::contains) // 筛选出 list2 中存在的元素
                 .collect(Collectors.toList());
         if (intersection.isEmpty()) throw new Exception("无权限访问");
+    }
+
+    @Override
+    public UniversalResponse<?> selectSoftwareDetail(Integer id) {
+
+        Resource resource=resourceMapper.selectById(id);
+        if(resource==null) return new UniversalResponse<>(500,"找不到资源");
+        SoftwareDetailRes softwareDetailRes=new  SoftwareDetailRes();
+        softwareDetailRes.setResouceId(id);
+        softwareDetailRes.setResouceName(resource.getResourceName());
+        softwareDetailRes.setResouceIp(resource.getResourceIp());
+        softwareDetailRes.setResourceType(resource.getResourceType());
+        softwareDetailRes.setResourcePort(resource.getResourcePort());
+        softwareDetailRes.setStartMode(resource.getStartMode());
+
+        PrometheusResponse response=prometheusQueryExecutor.isMicroserviceOnline(resource.getResourceIp(),resource.getResourcePort());
+        if(response.getData().getResult().isEmpty())return new UniversalResponse<>(200,"资源未上线");
+        softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
+        softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
+        softwareDetailRes.setPrometheusUp(1);
+        return new UniversalResponse<>().success(softwareDetailRes);
+    }
+
+    @Override
+    public UniversalResponse<?> selectServerDetail(Integer id) {
+        return null;
     }
 }

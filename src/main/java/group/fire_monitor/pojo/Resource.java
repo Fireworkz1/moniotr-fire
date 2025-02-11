@@ -27,5 +27,5 @@ public class Resource {
     private String hardResourceUsername;
     private String hardResourcePassword;
     private Integer resourceCreaterId;
-
+    private String startMode;//docker or linux
 }

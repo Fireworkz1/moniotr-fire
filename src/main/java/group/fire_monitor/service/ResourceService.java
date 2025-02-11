@@ -26,4 +26,8 @@ public interface ResourceService {
     List<Integer> checkPermission(List<Integer> resourceIds);
 
     void checkPermission(Integer resourceId) throws Exception;
+
+    UniversalResponse<?> selectSoftwareDetail(Integer id);
+
+    UniversalResponse<?> selectServerDetail(Integer id);
 }

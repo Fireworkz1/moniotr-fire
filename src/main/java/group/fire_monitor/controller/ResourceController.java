@@ -42,7 +42,7 @@ public class ResourceController {
      * */
     @PostMapping("/selectServer")
     @ResponseBody
-    @ApiOperation("获取服务器资源")
+    @ApiOperation("查询服务器资源")
     public UniversalResponse<?> selectServer(@RequestParam(required = false) String str) {
 
         return resourceService.selectServer(str);
@@ -91,13 +91,33 @@ public class ResourceController {
     }
 
     /*
-     * 将软件资源从资源列表删除，并删除prometheus监测
+     * 查询软件资源
      * */
     @PostMapping("/selectSoftware")
     @ResponseBody
     @ApiOperation("查询软件资源")
     public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str) {
         return resourceService.selectSoftware(str);
+    }
+
+    /*
+     * 查询服务器资源
+     * */
+    @PostMapping("/selectSoftwareDetail")
+    @ResponseBody
+    @ApiOperation("查询具体某一软件")
+    public UniversalResponse<?> selectSoftwareDetail(@RequestParam Integer id) {
+        return resourceService.selectSoftwareDetail(id);
+    }
+
+    /*
+     * 查询资源
+     * */
+    @PostMapping("/selectServerDetail")
+    @ResponseBody
+    @ApiOperation("查询具体某一服务器")
+    public UniversalResponse<?> selectServerDetail(@RequestParam Integer id) {
+        return resourceService.selectServerDetail(id);
     }
 
 
