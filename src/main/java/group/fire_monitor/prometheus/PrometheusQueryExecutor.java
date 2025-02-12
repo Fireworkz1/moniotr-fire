@@ -21,23 +21,20 @@ public class PrometheusQueryExecutor {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String prometheusUrl = "http://8.130.20.137:9090/api/v1/query";
 
-    public PrometheusResponse executeQuery(String query){
+    public PrometheusResponse executeQuery(String query) throws Exception {
 
-        try {
+
             String url = prometheusUrl + "?query={query}";
             String ans=restTemplate.getForObject(url,String.class,query);
             return PrometheusResponseParser.parse(ans);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new PrometheusResponse();
-        }
+
 
     }
-    public PrometheusResponse isMicroserviceOnline(String ip,String port){
+    public PrometheusResponse isMicroserviceOnline(String ip,String port) throws Exception {
         String query = String.format("up{instance=\"%s:%s\"}", ip, port);
         return executeQuery(query);
     }
-    public PrometheusResponse up()  {
+    public PrometheusResponse up() throws Exception {
         String query = "up";
         return executeQuery(query);
     }

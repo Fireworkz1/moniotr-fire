@@ -274,7 +274,12 @@ public class ResourceServiceImpl implements ResourceService {
         softwareDetailRes.setResourcePort(resource.getResourcePort());
         softwareDetailRes.setStartMode(resource.getStartMode());
 
-        PrometheusResponse response=prometheusQueryExecutor.isMicroserviceOnline(resource.getResourceIp(),resource.getResourcePort());
+        PrometheusResponse response= null;
+        try {
+            response = prometheusQueryExecutor.isMicroserviceOnline(resource.getResourceIp(),resource.getResourcePort());
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
         if(response.getData().getResult().isEmpty())return new UniversalResponse<>(200,"资源未上线");
         softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
         softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
