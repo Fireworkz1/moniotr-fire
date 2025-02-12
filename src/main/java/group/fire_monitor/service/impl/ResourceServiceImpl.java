@@ -337,6 +337,8 @@ public class ResourceServiceImpl implements ResourceService {
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
+                resource.setReservedParam(containerId);
+                resourceMapper.updateById(resource);
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.stopContainer(containerId);
@@ -355,6 +357,8 @@ public class ResourceServiceImpl implements ResourceService {
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
+                resource.setReservedParam(containerId);
+                resourceMapper.updateById(resource);
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.restartContainer(containerId);
@@ -372,6 +376,8 @@ public class ResourceServiceImpl implements ResourceService {
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
+                resource.setReservedParam(containerId);
+                resourceMapper.updateById(resource);
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.startContainer(containerId);
