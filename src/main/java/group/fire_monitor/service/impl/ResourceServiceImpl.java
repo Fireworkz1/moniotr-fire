@@ -12,6 +12,7 @@ import group.fire_monitor.pojo.RelationGroupResource;
 import group.fire_monitor.pojo.RelationGroupUser;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
+import group.fire_monitor.pojo.res.ContainerDetailRes;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
 import group.fire_monitor.pojo.res.SoftwareDetailRes;
 import group.fire_monitor.service.docker.DockerManager;
@@ -386,6 +387,16 @@ public class ResourceServiceImpl implements ResourceService {
             return new UniversalResponse<>(500,e.getMessage());
         }
     }
+
+    @Override
+    public UniversalResponse<?> dockerDetails(Integer id) {
+        Resource resource= resourceMapper.selectById(id);
+        if(!Objects.equals(resource.getResourceTypeSecond(), "docker"))return new UniversalResponse<>(500,"不是docker资源");
+        DockerManager dockerManager=new DockerManager(resource.getResourceIp());
+        ContainerDetailRes containerDetailRes= dockerManager.showContainerInfo(resource.getReservedParam());
+        return new UniversalResponse<>().success(containerDetailRes);
+    }
+
     private String getContainerId(Integer id) {
         Resource resource=resourceMapper.selectById(id);
         if(!Objects.equals(resource.getStartMode(), "docker"))throw new RuntimeException("资源不是docker启动");

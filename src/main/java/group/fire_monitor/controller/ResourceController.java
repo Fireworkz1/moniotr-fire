@@ -126,7 +126,7 @@ public class ResourceController {
     @PostMapping("/software/docker/stop")
     @ResponseBody
     @ApiOperation("根据资源id停止docker容器")
-    public UniversalResponse<?> stopDocker(@RequestParam Integer id) {
+    public UniversalResponse<?> stopContainer(@RequestParam Integer id) {
         try {
             return resourceService.stopContainer(id);
         }catch (Exception e){
@@ -141,7 +141,7 @@ public class ResourceController {
     @PostMapping("/software/docker/restart")
     @ResponseBody
     @ApiOperation("根据资源id重启docker容器")
-    public UniversalResponse<?> restartDocker(@RequestParam Integer id) {
+    public UniversalResponse<?> restartContainer(@RequestParam Integer id) {
         return resourceService.restartDocker(id);
     }
 
@@ -151,10 +151,16 @@ public class ResourceController {
     @PostMapping("/software/docker/start")
     @ResponseBody
     @ApiOperation("根据资源id启动docker容器")
-    public UniversalResponse<?> startDocker(@RequestParam Integer id) {
+    public UniversalResponse<?> startContainer(@RequestParam Integer id) {
         return resourceService.startDocker(id);
     }
 
+    @PostMapping("/software/docker/details")
+    @ResponseBody
+    @ApiOperation("根据资源id查询docker容器信息")
+    public UniversalResponse<?> containerDetails(@RequestParam Integer id) {
+        return resourceService.dockerDetails(id);
+    }
 
 
 }

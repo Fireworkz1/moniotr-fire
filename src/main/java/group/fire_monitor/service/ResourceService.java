@@ -36,4 +36,6 @@ public interface ResourceService {
     UniversalResponse<?> restartDocker(Integer id);
 
     UniversalResponse<?> startDocker(Integer id);
+
+    UniversalResponse<?> dockerDetails(Integer id);
 }

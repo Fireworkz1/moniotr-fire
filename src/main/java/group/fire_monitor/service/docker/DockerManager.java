@@ -6,6 +6,7 @@ import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.core.DockerClientBuilder;
+import group.fire_monitor.pojo.res.ContainerDetailRes;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +40,10 @@ public class DockerManager {
             System.out.println("--------------------------------------");
         }
     }
-    public void printContainerInfo(){
+    public ContainerDetailRes showContainerInfo(String containerId){
+        ContainerDetailRes containerDetailRes=new ContainerDetailRes();
         try {
             // 替换为实际的容器 ID
-            String containerId = "your-container-id";
             InspectContainerResponse containerDetails = dockerClient.inspectContainerCmd(containerId).exec();
 
             System.out.println("Container ID: " + containerDetails.getId());
@@ -54,6 +55,7 @@ public class DockerManager {
         } finally {
 
         }
+        return containerDetailRes;
     }
     public String getContainerIdByPort(String port){
         List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
