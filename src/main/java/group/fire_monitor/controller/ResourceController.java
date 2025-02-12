@@ -120,5 +120,41 @@ public class ResourceController {
         return resourceService.selectServerDetail(id);
     }
 
+    /*
+     * 停止docker程序
+     * */
+    @PostMapping("/software/docker/stop")
+    @ResponseBody
+    @ApiOperation("根据资源id停止docker容器")
+    public UniversalResponse<?> stopDocker(@RequestParam Integer id) {
+        try {
+            return resourceService.stopDocker(id);
+        }catch (Exception e){
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
+    }
+
+    /*
+     * 重启docker程序
+     * */
+    @PostMapping("/software/docker/restart")
+    @ResponseBody
+    @ApiOperation("根据资源id重启docker容器")
+    public UniversalResponse<?> restartDocker(@RequestParam Integer id) {
+        return resourceService.restartDocker(id);
+    }
+
+    /*
+     * 打开docker程序
+     * */
+    @PostMapping("/software/docker/start")
+    @ResponseBody
+    @ApiOperation("根据资源id启动docker容器")
+    public UniversalResponse<?> startDocker(@RequestParam Integer id) {
+        return resourceService.startDocker(id);
+    }
+
+
 
 }

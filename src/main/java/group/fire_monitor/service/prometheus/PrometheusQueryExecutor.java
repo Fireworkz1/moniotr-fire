@@ -1,4 +1,4 @@
-package group.fire_monitor.prometheus;
+package group.fire_monitor.service.prometheus;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

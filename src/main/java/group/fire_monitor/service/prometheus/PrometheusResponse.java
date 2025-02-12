@@ -1,4 +1,4 @@
-package group.fire_monitor.prometheus;
+package group.fire_monitor.service.prometheus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import group.fire_monitor.pojo.PrometheusResult;

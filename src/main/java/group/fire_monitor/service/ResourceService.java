@@ -30,4 +30,10 @@ public interface ResourceService {
     UniversalResponse<?> selectSoftwareDetail(Integer id);
 
     UniversalResponse<?> selectServerDetail(Integer id);
+
+    UniversalResponse<?> stopDocker(Integer id);
+
+    UniversalResponse<?> restartDocker(Integer id);
+
+    UniversalResponse<?> startDocker(Integer id);
 }

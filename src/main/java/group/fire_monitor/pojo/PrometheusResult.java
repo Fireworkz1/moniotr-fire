@@ -1,6 +1,5 @@
 package group.fire_monitor.pojo;
 
-import group.fire_monitor.prometheus.PrometheusResponse;
 import lombok.Data;
 
 import java.util.List;

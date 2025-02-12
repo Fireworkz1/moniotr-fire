@@ -14,8 +14,9 @@ import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
 import group.fire_monitor.pojo.res.SoftwareDetailRes;
-import group.fire_monitor.prometheus.PrometheusQueryExecutor;
-import group.fire_monitor.prometheus.PrometheusResponse;
+import group.fire_monitor.service.docker.DockerManager;
+import group.fire_monitor.service.prometheus.PrometheusQueryExecutor;
+import group.fire_monitor.service.prometheus.PrometheusResponse;
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.util.JWTUtil;
 import group.fire_monitor.util.enums.PermissionLevelEnum;
@@ -321,5 +322,30 @@ public class ResourceServiceImpl implements ResourceService {
             return new UniversalResponse<>(500,e.getMessage());
         }
 
+    }
+
+    @Override
+    public UniversalResponse<?> stopDocker(Integer id) {
+        getContainerId(id);
+        return null;
+    }
+
+    @Override
+    public UniversalResponse<?> restartDocker(Integer id) {
+        return null;
+    }
+
+    @Override
+    public UniversalResponse<?> startDocker(Integer id) {
+        return null;
+    }
+    private String getContainerId(Integer id) {
+        Resource resource=resourceMapper.selectById(id);
+        if(!Objects.equals(resource.getStartMode(), "docker"))throw new RuntimeException("资源不是docker启动");
+        String ip= resource.getResourceIp();
+        DockerManager dockerManager=new DockerManager(ip);
+        String containerId=dockerManager.getContainerIdByPort(resource.getResourcePort());
+
+        return containerId;
     }
 }
