@@ -276,17 +276,20 @@ public class ResourceServiceImpl implements ResourceService {
         softwareDetailRes.setStartMode(resource.getStartMode());
         softwareDetailRes.setResourceDescription(resource.getResourceDescription());
         softwareDetailRes.setExporterType("micrometer");
-        PrometheusResponse response= null;
         try {
-            response = prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort());
+            PrometheusResponse response = prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort());
+            if(response.getData().getResult().isEmpty())return new UniversalResponse<>(500,"资源未在prometheus配置");
+            softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
+            softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
+            softwareDetailRes.setPrometheusUp(Integer.valueOf(response.getSingleValue()));
+            if (softwareDetailRes.getPrometheusUp()==0){
+                return new UniversalResponse<>().success(softwareDetailRes);
+            }
+            return new UniversalResponse<>().success(softwareDetailRes);
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }
-        if(response.getData().getResult().isEmpty())return new UniversalResponse<>(200,"资源未上线");
-        softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
-        softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
-        softwareDetailRes.setPrometheusUp(1);
-        return new UniversalResponse<>().success(softwareDetailRes);
+
     }
 
     @Override
@@ -302,11 +305,14 @@ public class ResourceServiceImpl implements ResourceService {
         hardwareDetailRes.setExporterType("node_exporter");
         try {
             PrometheusResponse prometheusResponse=prometheusQueryExecutor.up_single(resource.getResourceIp(),"9100");
-            if(prometheusResponse.getSingleResult().getValue().isEmpty())return new UniversalResponse<>(500,"资源未上线");
+            if(prometheusResponse.getSingleResult().getValue().isEmpty())return new UniversalResponse<>(500,"资源未在prometheus配置");
             PrometheusResult result=prometheusResponse.getSingleResult();
             hardwareDetailRes.setPrometheusInstance(result.getMetric().getInstance());
             hardwareDetailRes.setPrometheusJobname(result.getMetric().getJob());
-            hardwareDetailRes.setPrometheusUp(1);
+            hardwareDetailRes.setPrometheusUp(Integer.valueOf(prometheusResponse.getSingleValue()));
+            if (hardwareDetailRes.getPrometheusUp()==0){
+                return new UniversalResponse<>().success(hardwareDetailRes);
+            }
             hardwareDetailRes.setPrometheusAvailableFileGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_file_free_gb_single(resource.getResourceIp()).getSingleValue()))));
             hardwareDetailRes.setPrometheusTotalMemoryGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_memory_gb_single(resource.getResourceIp()).getSingleValue()))));
             hardwareDetailRes.setPrometheusCpuNums(prometheusQueryExecutor.server_cpu_nums_single(resource.getResourceIp()).getSingleResult().getValue().get(1).toString());
