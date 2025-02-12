@@ -1,6 +1,5 @@
 package group.fire_monitor.service.impl;
 
-import com.auth0.jwt.JWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -8,10 +7,12 @@ import com.jcraft.jsch.Session;
 import group.fire_monitor.mapper.RelationGroupResourceMapper;
 import group.fire_monitor.mapper.RelationGroupUserMapper;
 import group.fire_monitor.mapper.ResourceMapper;
+import group.fire_monitor.pojo.PrometheusResult;
 import group.fire_monitor.pojo.RelationGroupResource;
 import group.fire_monitor.pojo.RelationGroupUser;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
+import group.fire_monitor.pojo.res.HardwareDetailRes;
 import group.fire_monitor.pojo.res.SoftwareDetailRes;
 import group.fire_monitor.prometheus.PrometheusQueryExecutor;
 import group.fire_monitor.prometheus.PrometheusResponse;
@@ -273,10 +274,11 @@ public class ResourceServiceImpl implements ResourceService {
         softwareDetailRes.setResourceType(resource.getResourceType());
         softwareDetailRes.setResourcePort(resource.getResourcePort());
         softwareDetailRes.setStartMode(resource.getStartMode());
-
+        softwareDetailRes.setResourceDescription(resource.getResourceDescription());
+        softwareDetailRes.setExporterType("micrometer");
         PrometheusResponse response= null;
         try {
-            response = prometheusQueryExecutor.isMicroserviceOnline(resource.getResourceIp(),resource.getResourcePort());
+            response = prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort());
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }
@@ -289,6 +291,29 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public UniversalResponse<?> selectServerDetail(Integer id) {
-        return null;
+        Resource resource=resourceMapper.selectById(id);
+        if(resource==null) return new UniversalResponse<>(500,"找不到资源");
+        HardwareDetailRes hardwareDetailRes=new HardwareDetailRes();
+        hardwareDetailRes.setResouceId(id);
+        hardwareDetailRes.setResouceName(resource.getResourceName());
+        hardwareDetailRes.setResouceIp(resource.getResourceIp());
+        hardwareDetailRes.setResourceType("server");
+        hardwareDetailRes.setResourceDescription(resource.getResourceDescription());
+        hardwareDetailRes.setExporterType("node_exporter");
+        try {
+            PrometheusResponse prometheusResponse=prometheusQueryExecutor.up_single(resource.getResourceIp(),"9100");
+            if(prometheusResponse.getSingleResult().getValue().isEmpty())return new UniversalResponse<>(500,"资源未上线");
+            PrometheusResult result=prometheusResponse.getSingleResult();
+            hardwareDetailRes.setPrometheusInstance(result.getMetric().getInstance());
+            hardwareDetailRes.setPrometheusJobname(result.getMetric().getJob());
+            hardwareDetailRes.setPrometheusUp(1);
+            hardwareDetailRes.setPrometheusAvailableFileGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_file_free_gb_single(resource.getResourceIp()).getSingleValue()))));
+            hardwareDetailRes.setPrometheusTotalMemoryGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_memory_gb_single(resource.getResourceIp()).getSingleValue()))));
+            hardwareDetailRes.setPrometheusCpuNums(prometheusQueryExecutor.server_cpu_nums_single(resource.getResourceIp()).getSingleResult().getValue().get(1).toString());
+            return new UniversalResponse<>().success(hardwareDetailRes);
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
     }
 }
