@@ -391,7 +391,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public UniversalResponse<?> dockerDetails(Integer id) {
         Resource resource= resourceMapper.selectById(id);
-        if(!Objects.equals(resource.getResourceTypeSecond(), "docker"))return new UniversalResponse<>(500,"不是docker资源");
+        if(!Objects.equals(resource.getStartMode(), "docker"))return new UniversalResponse<>(500,"不是docker资源");
         DockerManager dockerManager=new DockerManager(resource.getResourceIp());
         ContainerDetailRes containerDetailRes= dockerManager.showContainerInfo(resource.getReservedParam());
         return new UniversalResponse<>().success(containerDetailRes);

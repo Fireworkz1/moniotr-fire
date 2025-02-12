@@ -46,12 +46,11 @@ public class DockerManager {
             // 替换为实际的容器 ID
             InspectContainerResponse containerDetails = dockerClient.inspectContainerCmd(containerId).exec();
 
-            System.out.println("Container ID: " + containerDetails.getId());
-            System.out.println("Container Name: " + containerDetails.getName());
-            System.out.println("Container Image: " + containerDetails.getConfig().getImage());
-            System.out.println("Container Status: " + containerDetails.getState().getStatus());
-            System.out.println("Container Ports: " + containerDetails.getNetworkSettings().getPorts());
-            System.out.println("--------------------------------------------------");
+            containerDetailRes.setContainerId(containerDetails.getId());
+            containerDetailRes.setName(containerDetails.getName());
+            containerDetailRes.setPlatform(containerDetails.getPlatform());
+            containerDetailRes.setStatus(containerDetails.getState().getStatus());
+            containerDetailRes.setStartedAt(containerDetails.getState().getStartedAt());
         } finally {
 
         }
