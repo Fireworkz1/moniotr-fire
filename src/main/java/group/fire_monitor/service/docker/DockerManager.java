@@ -57,7 +57,6 @@ public class DockerManager {
     }
     public String getContainerIdByPort(String port){
         List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
-        String hostPort = "8080"; // 替换为你需要查找的主机端口
         for (Container container : containers) {
             // 获取容器的详细信息
             if (Objects.requireNonNull(container.getPorts()[0].getPublicPort()).toString().equals(port)){
@@ -68,24 +67,22 @@ public class DockerManager {
         return null;
     }
     public void startContainer(String containerId) {
+        InspectContainerResponse containerDetails = dockerClient.inspectContainerCmd(containerId).exec();
+        if(Objects.requireNonNull(containerDetails.getState().getRunning())){
+            throw new RuntimeException("容器已在运行");
+        }
         dockerClient.startContainerCmd(containerId).exec();
     }
     public void stopContainer(String containerId) {
+        InspectContainerResponse containerDetails = dockerClient.inspectContainerCmd(containerId).exec();
+        if(!Objects.requireNonNull(containerDetails.getState().getRunning())){
+            throw new RuntimeException("容器已经停止");
+        }
         dockerClient.stopContainerCmd(containerId).exec();
     }
-    public void restartContainer(String containerName) {
+    public void restartContainer(String containerId) {
         try {
-            // 获取容器的 ID
-            String containerId = dockerClient.listContainersCmd().withShowAll(true)
-                    .exec().stream()
-                    .filter(container -> container.getNames()[0].equals("/" + containerName))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("容器未找到"))
-                    .getId();
-
-            // 重启容器
             dockerClient.restartContainerCmd(containerId).exec();
-            System.out.println("容器 " + containerName + " 已重启");
         } catch (Exception e) {
             e.printStackTrace();
         }

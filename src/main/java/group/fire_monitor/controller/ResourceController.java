@@ -128,7 +128,7 @@ public class ResourceController {
     @ApiOperation("根据资源id停止docker容器")
     public UniversalResponse<?> stopDocker(@RequestParam Integer id) {
         try {
-            return resourceService.stopDocker(id);
+            return resourceService.stopContainer(id);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
         }

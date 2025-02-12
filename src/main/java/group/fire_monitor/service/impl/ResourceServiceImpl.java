@@ -151,6 +151,10 @@ public class ResourceServiceImpl implements ResourceService {
             resourceCreateForm.getResource().setResourceCreaterId(JWTUtil.getCurrentUser().getId());
             resourceCreateForm.getResource() .setResourceType("software");
             resourceCreateForm.getResource() .setAddedTime(new Timestamp(System.currentTimeMillis()));
+            //填充containerId
+            DockerManager dockerManager=new DockerManager(resourceCreateForm.getResource().getResourceIp());
+            String containerId=dockerManager.getContainerIdByPort(resourceCreateForm.getResource().getResourcePort());
+            resourceCreateForm.getResource().setReservedParam(containerId);
             resourceMapper.insert(resourceCreateForm.getResource());
             //注册资源访问权限表
             for(Integer groupId:resourceCreateForm.getGroupIdList()){
@@ -159,6 +163,7 @@ public class ResourceServiceImpl implements ResourceService {
                 relationGroupResource.setResourceId(resourceCreateForm.getResource().getId());
                 relationGroupResourceMapper.insert(relationGroupResource);
             }
+
 
             //TODO:JAVA API实现注册(需要监测有没有安装exporter)
             return new UniversalResponse<>().success();
@@ -325,19 +330,55 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public UniversalResponse<?> stopDocker(Integer id) {
-        getContainerId(id);
-        return null;
+    public UniversalResponse<?> stopContainer(Integer id) {
+        try{
+
+            Resource resource=resourceMapper.selectById(id);
+            String containerId=resource.getReservedParam();
+            if(containerId==null||containerId.isEmpty()){
+                containerId=getContainerId(id);
+            }
+            DockerManager dockerManager=new DockerManager(resource.getResourceIp());
+            dockerManager.stopContainer(containerId);
+
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
     }
 
     @Override
     public UniversalResponse<?> restartDocker(Integer id) {
-        return null;
+        try{
+            Resource resource=resourceMapper.selectById(id);
+            String containerId=resource.getReservedParam();
+            if(containerId==null||containerId.isEmpty()){
+                containerId=getContainerId(id);
+            }
+            DockerManager dockerManager=new DockerManager(resource.getResourceIp());
+            dockerManager.restartContainer(containerId);
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
     }
 
     @Override
     public UniversalResponse<?> startDocker(Integer id) {
-        return null;
+        try{
+            Resource resource=resourceMapper.selectById(id);
+            String containerId=resource.getReservedParam();
+            if(containerId==null||containerId.isEmpty()){
+                containerId=getContainerId(id);
+            }
+            DockerManager dockerManager=new DockerManager(resource.getResourceIp());
+            dockerManager.startContainer(containerId);
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
     }
     private String getContainerId(Integer id) {
         Resource resource=resourceMapper.selectById(id);
