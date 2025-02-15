@@ -22,23 +22,23 @@ public class PrometheusResponse {
 
     }
 
-    public PrometheusResult getSingleResult() throws Exception {
+    public PrometheusResult getSingleResult()  {
         checkStatus();
         return this.getData().getResult().get(0);
     }
-    public List<PrometheusResult> getResults() throws Exception {
+    public List<PrometheusResult> getResults()  {
         checkStatus();
         return this.getData().getResult();
     }
-    private void checkStatus() throws Exception {
-        if (Objects.equals(this.getStatus(), "error")) throw new Exception("prometheus查询错误");
+    private void checkStatus()  {
+        if (Objects.equals(this.getStatus(), "error")) throw new RuntimeException("prometheus查询错误");
     }
 
-    public String getSingleValue() throws Exception {
+    public String getSingleValue() {
         PrometheusResult result= getSingleResult();
         return (String) result.getValue().get(1);
     }
-    public Timestamp getSingleTimestamp() throws Exception {
+    public Timestamp getSingleTimestamp()  {
         PrometheusResult result= getSingleResult();
         return (Timestamp) result.getValue().get(0);
     }

@@ -1,5 +1,6 @@
 package group.fire_monitor.controller;
 
+import group.fire_monitor.mapper.ResourceMapper;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.service.ResourceService;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 public class ResourceController {
     @Autowired
     ResourceService resourceService;
+    @Autowired
+    ResourceMapper resourceMapper;
     /*
     * 测试服务器能否联通
     * */
@@ -46,6 +49,16 @@ public class ResourceController {
     public UniversalResponse<?> selectServer(@RequestParam(required = false) String str) {
 
         return resourceService.selectServer(str);
+    }
+    @PostMapping("/selectServerById")
+    @ResponseBody
+    @ApiOperation("查询服务器资源Byid")
+    public UniversalResponse<?> selectServerbyid(@RequestParam(required = false) Integer id) {
+        Resource resource= resourceMapper.selectById(id);
+        if(resource!=null){
+            return new UniversalResponse<>().success() ;
+        }
+        return new UniversalResponse<>(500,"找不到资源");
     }
     /*
     * 服务器从资源列表删除
@@ -98,6 +111,16 @@ public class ResourceController {
     @ApiOperation("查询软件资源")
     public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str) {
         return resourceService.selectSoftware(str);
+    }
+    @PostMapping("/selectSoftwareById")
+    @ResponseBody
+    @ApiOperation("查询软件资源Byid")
+    public UniversalResponse<?> selectSoftwarebyid(@RequestParam(required = false) Integer id) {
+        Resource resource= resourceMapper.selectById(id);
+        if(resource!=null){
+            return new UniversalResponse<>().success() ;
+        }
+        return new UniversalResponse<>(500,"找不到资源");
     }
 
     /*

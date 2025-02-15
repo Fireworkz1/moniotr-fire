@@ -194,4 +194,17 @@ public class UserController {
         }
 
     }
+
+    @GetMapping("selectGroup")
+    @ApiOperation("查询当前用户属于分组")
+    @ResponseBody
+    public  UniversalResponse<?> group(){
+        try{
+            return new UniversalResponse<>().success(groupMapper.selectList(new QueryWrapper<Group>().eq("user_id",JWTUtil.getCurrentUser().getId()))) ;
+        }catch (Exception e){
+            e.printStackTrace();
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
+    }
 }

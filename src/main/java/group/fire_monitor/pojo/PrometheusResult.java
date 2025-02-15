@@ -2,6 +2,8 @@ package group.fire_monitor.pojo;
 
 import lombok.Data;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -14,11 +16,19 @@ public class PrometheusResult {
         private String __name__;
         private String instance;
         private String job;
+        private String id;
 
         private String machine;
         private String nodename;
         private String sysname;
         private String release;
         private String version;
+    }
+
+    public Date getDataDateTime(){
+        return (Timestamp) this.value.get(0);
+    }
+    public Double getDataValue(){
+        return (Double) this.value.get(1);
     }
 }

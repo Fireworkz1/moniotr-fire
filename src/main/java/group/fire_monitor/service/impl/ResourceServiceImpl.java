@@ -322,7 +322,13 @@ public class ResourceServiceImpl implements ResourceService {
             }
             hardwareDetailRes.setPrometheusAvailableFileGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_file_free_gb_single(resource.getResourceIp()).getSingleValue()))));
             hardwareDetailRes.setPrometheusTotalMemoryGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_memory_gb_single(resource.getResourceIp()).getSingleValue()))));
+            hardwareDetailRes.setPrometheusServerloadtime(prometheusQueryExecutor.server_running_seconds_single(resource.getResourceIp()).getSingleValue());
             hardwareDetailRes.setPrometheusCpuNums(prometheusQueryExecutor.server_cpu_nums_single(resource.getResourceIp()).getSingleResult().getValue().get(1).toString());
+            PrometheusResult result1= prometheusQueryExecutor.server_basic_data_single(resource.getResourceIp()).getSingleResult();
+            hardwareDetailRes.setSysname(result1.getMetric().getSysname());
+            hardwareDetailRes.setVersion(result1.getMetric().getVersion());
+            hardwareDetailRes.setNodename(result1.getMetric().getNodename());
+            hardwareDetailRes.setMachine(result1.getMetric().getMachine());
             return new UniversalResponse<>().success(hardwareDetailRes);
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
