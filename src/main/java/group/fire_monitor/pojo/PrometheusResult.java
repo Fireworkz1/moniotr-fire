@@ -25,10 +25,10 @@ public class PrometheusResult {
         private String version;
     }
 
-    public Date getDataDateTime(){
-        return (Timestamp) this.value.get(0);
-    }
-    public Double getDataValue(){
-        return (Double) this.value.get(1);
-    }
+//    public Date getDataDateTime(){
+//        return (Timestamp) this.value.get(0);
+//    }
+//    public Double getDataValue(){
+//        return (Double) this.value.get(1);
+//    }
 }

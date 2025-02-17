@@ -20,5 +20,5 @@ public class Monitor {
     private String monitorGroupIds;
     private String monitorResourceIds;
     private String monitorType;
-    private Date monitorAddedDate;
+    private Date monitorAddedTime;
 }

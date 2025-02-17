@@ -2,10 +2,7 @@ package group.fire_monitor.util;
 
 import org.springframework.boot.autoconfigure.jms.JmsProperties;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CommonUtil {
     public static boolean hasValue(Object obj) {
@@ -40,7 +37,7 @@ public class CommonUtil {
         }
         return list;
     }
-    public Boolean hasIntersection(List<?> list1, List<?> list2) {
+    public static Boolean hasIntersection(List<?> list1, List<?> list2) {
         if (list1 == null || list2 == null || list1.isEmpty() || list2.isEmpty()) {
             return false;
         }
@@ -56,5 +53,22 @@ public class CommonUtil {
             }
         }
         return false; // 遍历完后没有发现交集
+    }
+
+    public static boolean needToWarn(String compareType,Double value,Double threshold){
+        switch(compareType){
+            case ">=":
+                if(value>=threshold)
+                    return true;
+            case "<=":
+                if(value<=threshold)
+                    return true;
+            case "=":
+                if(Objects.equals(value, threshold))
+                    return true;
+            default:
+                throw new RuntimeException("目前只支持>=,<=,=三种判断条件");
+
+        }
     }
 }

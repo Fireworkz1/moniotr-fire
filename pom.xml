@@ -41,6 +41,11 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.7</version> <!-- 替换为最新版本 -->
         </dependency>
+        <dependency>
+            <groupId>tech.powerjob</groupId>
+            <artifactId>powerjob-worker-spring-boot-starter</artifactId>
+            <version>5.1.1</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.mybatis.spring.boot</groupId>-->
 <!--            <artifactId>mybatis-spring-boot-starter</artifactId>-->

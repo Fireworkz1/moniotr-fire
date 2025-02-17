@@ -42,6 +42,9 @@ public class MonitorServiceImpl implements MonitorService {
             monitor.setMonitorDescription(form.getMonitorDescription());
             monitor.setMonitorName(form.getMonitorName());
             monitor.setMonitorNotpresetPromql(form.getMonitorNotpresetPromql());
+            if(!Objects.equals(form.getMonitorDemonstration(), "table") && !Objects.equals(form.getMonitorDemonstration(), "graph")){
+                throw new RuntimeException("demonstration应为table或gtaph");
+            }
             monitor.setMonitorDemonstration(form.getMonitorDemonstration());
             monitor.setMonitorPresetTarget(form.getMonitorPresetTarget());
             if(CommonUtil.hasValue(form.getMonitorPresetTarget())&&CommonUtil.hasValue(form.getMonitorNotpresetPromql())){
@@ -56,7 +59,7 @@ public class MonitorServiceImpl implements MonitorService {
             }
             checkAccessibility(monitor);
 
-            monitor.setMonitorAddedDate(new Date());
+            monitor.setMonitorAddedTime(new Date());
             monitor.setMonitorType(form.getMonitorType());
 
             monitor.setMonitorGroupIds(CommonUtil.listToString(form.getMonitorGroupIds()));
@@ -93,13 +96,13 @@ public class MonitorServiceImpl implements MonitorService {
         List<String> instanceList=new ArrayList<>();
         for(Resource resource:resourceList){
             String instance=resource.getResourceIp()+":"+resource.getResourcePort();
+            if(Objects.equals(resource.getResourceType(), "server")){
+                instance=instance+"9100";
+            }
             instanceList.add(instance);
         }
         List<PrometheusResult> filteredResults=new ArrayList<>();
         for(PrometheusResult result:rawResults) {
-            String[] parts = result.getMetric().getInstance().split(":");
-            String ip = parts[0];
-            String port = parts[1];
             if(instanceList.contains(result.getMetric().getInstance())){
                 filteredResults.add(result);
             }
