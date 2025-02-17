@@ -18,15 +18,15 @@ logging:
       ordersystem:
         mapper: debug
 
-powerjob:
-  worker:
-    akka-port: 27777
-    app-name: fire-monitor
-    server-address: 116.205.107.104:7700
-    protocol: http
-    store-strategy: disk
-    max-result-length: 4096
-    max-appended-wf-context-length: 4096
-    max-lightweight-task-num: 1024
-    max-heavy-task-num: 64
-  server-address:
+#powerjob:
+#  worker:
+#    akka-port: 27777
+#    app-name: fire-monitor
+#    server-address: 116.205.107.104:7700
+#    protocol: http
+#    store-strategy: disk
+#    max-result-length: 4096
+#    max-appended-wf-context-length: 4096
+#    max-lightweight-task-num: 1024
+#    max-heavy-task-num: 64
+#  server-address:
