@@ -3,12 +3,14 @@ package group.fire_monitor.service.Warner;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.mapper.UserMapper;
+import group.fire_monitor.mapper.WarnHistoryMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
 import group.fire_monitor.pojo.*;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.service.emailsender.EmailSender;
 import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.enums.WarnNoticeEnum;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -30,6 +32,8 @@ public class Warner {
     MonitorMapper monitorMapper;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    WarnHistoryMapper warnHistoryMapper;
 
     private final ExecutorService executorService;
 
@@ -53,6 +57,7 @@ public class Warner {
     public void warning() {
         List<WarnPolicy> warnTargetList=warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("is_active",1));
         List<WarnPolicy> updateWarnList = Collections.synchronizedList(new ArrayList<>());
+        List<WarnPolicy> moveToHistoryList = Collections.synchronizedList(new ArrayList<>());
         for (WarnPolicy policy : warnTargetList) {
             executorService.submit(() -> {
                 Monitor monitor = monitorMapper.selectById(policy.getMonitorId());
@@ -94,10 +99,12 @@ public class Warner {
                         policy.setCurrentStatus(WarnNoticeEnum.WARNING.getLevel());
                     }else{
                         if(policy.getIsActive()==1){
+                            moveToHistoryList.add(policy);
                             policy.setIsActive(0);
                             policy.setHasSentNotice(0);
                             policy.setWarnRepeatTimes(0);
                             policy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
+
                         }
                     }
                 updateWarnList.add(policy);
@@ -105,6 +112,13 @@ public class Warner {
             });
         }
         warnPolicyMapper.updateById(updateWarnList);
+        List<WarnHistory> warnHistoryList=new ArrayList<>();
+        for(WarnPolicy policyhis: moveToHistoryList){
+            WarnHistory history=new WarnHistory();
+            BeanUtils.copyProperties(policyhis, history);
+            warnHistoryList.add(history);
+        }
+        warnHistoryMapper.insert(warnHistoryList);
     }
 
     private void sendNotice(WarnPolicy policy,Monitor monitor,Double value) {
