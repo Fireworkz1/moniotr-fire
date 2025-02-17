@@ -42,6 +42,11 @@
             <version>3.5.7</version> <!-- 替换为最新版本 -->
         </dependency>
         <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
             <groupId>tech.powerjob</groupId>
             <artifactId>powerjob-worker-spring-boot-starter</artifactId>
             <version>5.1.1</version>

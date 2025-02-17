@@ -1,12 +1,12 @@
-package group.fire_monitor.service;
+package group.fire_monitor.service.Warner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
+import group.fire_monitor.mapper.UserMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
-import group.fire_monitor.pojo.Monitor;
-import group.fire_monitor.pojo.PrometheusResult;
-import group.fire_monitor.pojo.WarnContent;
-import group.fire_monitor.pojo.WarnPolicy;
+import group.fire_monitor.pojo.*;
+import group.fire_monitor.service.MonitorService;
+import group.fire_monitor.service.emailsender.EmailSender;
 import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.enums.WarnNoticeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,8 @@ public class Warner {
     MonitorService monitorService;
     @Autowired
     MonitorMapper monitorMapper;
+    @Autowired
+    UserMapper userMapper;
 
     private final ExecutorService executorService;
 
@@ -84,13 +86,7 @@ public class Warner {
                             default:
                                 throw new RuntimeException("错误告警级别");
                         }
-                    }else{
-                        //如果不需要告警且以前有告警记录，需要清除告警次数
-                        //处理要更新的表字段
-                        if(policy.getIsActive()==1){
-
-                        }
-                    };
+                    }
                     if(flag.equals("active")){
                         policy.setIsActive(1);
                         policy.setHasSentNotice(1);
@@ -128,6 +124,14 @@ public class Warner {
         String title="fire-monitor监控系统告警信息";
         String content="warning[LEVEL=SEND_NOTICE]:"+monitor.getMonitorName()+":value="+value+" "+policy.getCompareType()
                 +"threshold="+ policy.getWarnThreshold();
+        EmailSender emailSender = new EmailSender();
+        List<Integer> userIds= (List<Integer>) CommonUtil.stringToList(policy.getNoticeUserIds());
+        List<User> userList= userMapper.selectBatchIds(userIds);
+        for(User user:userList){
+            emailSender.sendEmail(user.getEmail(),title,content);
+        }
+
+
     }
 
     private void logToDB(WarnPolicy policy,Monitor monitor,Double value) {
