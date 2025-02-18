@@ -17,7 +17,7 @@ public class PrometheusQueryExecutor {
         long endTimestamp = end.getTime() / 1000;     // 转换为秒
 
         // 构造查询 URL
-        String url = prometheusUrl + "/api/v1/query_range?query={query}&start={start}&end={end}&step=15s";
+        String url = prometheusUrl + "/api/v1/query_range?query={query}&start={start}&end={end}&step=60s";
 
         // 发起 HTTP 请求
         String response = restTemplate.getForObject(url, String.class, query, startTimestamp, endTimestamp);

@@ -16,6 +16,7 @@ public class PrometheusResult {
         private String __name__;
         private String instance;
         private String job;
+        private String area;
         private String id;
 
         private String domainname;
