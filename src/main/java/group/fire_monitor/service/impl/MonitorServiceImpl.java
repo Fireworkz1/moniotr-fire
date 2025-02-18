@@ -84,32 +84,24 @@ public class MonitorServiceImpl implements MonitorService {
 
     @Override
     public List<PrometheusResult> getSingleMonitorData(Monitor monitor) {
-        List<PrometheusResult> rawResults=new ArrayList<>();
+        List<PrometheusResult> rawResults;
         if (monitor.getMonitorIspreset()==1)
             rawResults= getData(monitor.getMonitorPresetTarget(),"table",null,null);
         else
             rawResults= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql())) .getResults();
+        return resultFilter(monitor,rawResults);
 
 
-        //TODO：使用redis优化函数运行速度
-        List<Integer> resourceIdList= (List<Integer>) CommonUtil.stringToList(monitor.getMonitorResourceIds());
-        List<Resource> resourceList= resourceMapper.selectBatchIds(resourceIdList);
-        List<String> instanceList=new ArrayList<>();
-        for(Resource resource:resourceList){
-            String instance=resource.getResourceIp()+":"+resource.getResourcePort();
-            if(Objects.equals(resource.getResourceType(), "server")){
-                instance=instance+"9100";
-            }
-            instanceList.add(instance);
-        }
-        List<PrometheusResult> filteredResults=new ArrayList<>();
-        for(PrometheusResult result:rawResults) {
-            if(instanceList.contains(result.getMetric().getInstance())){
-                filteredResults.add(result);
-            }
-        }
+    }
 
-        return filteredResults;
+    @Override
+    public List<PrometheusResult> getSequenceMonitorData(Monitor monitor, Date startTime, Date endTime) {
+        List<PrometheusResult> rawResults;
+        if (monitor.getMonitorIspreset()==1)
+            rawResults= getData(monitor.getMonitorPresetTarget(),"graph",startTime,endTime);
+        else
+            rawResults= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql()),startTime,endTime) .getResults();
+        return resultFilter(monitor,rawResults);
     }
 
     @Override
@@ -221,5 +213,25 @@ public class MonitorServiceImpl implements MonitorService {
         }
 
     }
+    private List<PrometheusResult> resultFilter(Monitor monitor,List<PrometheusResult> rawResults){
+        //TODO：使用redis优化函数运行速度
+        List<Integer> resourceIdList= (List<Integer>) CommonUtil.stringToList(monitor.getMonitorResourceIds());
+        List<Resource> resourceList= resourceMapper.selectBatchIds(resourceIdList);
+        List<String> instanceList=new ArrayList<>();
+        for(Resource resource:resourceList){
+            String instance=resource.getResourceIp()+":"+resource.getResourcePort();
+            if(Objects.equals(resource.getResourceType(), "server")){
+                instance=instance+"9100";
+            }
+            instanceList.add(instance);
+        }
+        List<PrometheusResult> filteredResults=new ArrayList<>();
+        for(PrometheusResult result:rawResults) {
+            if(instanceList.contains(result.getMetric().getInstance())){
+                filteredResults.add(result);
+            }
+        }
 
+        return filteredResults;
+    }
 }

@@ -4,6 +4,7 @@ import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.pojo.Monitor;
 import group.fire_monitor.pojo.form.AddMonitorForm;
 import group.fire_monitor.pojo.form.ChangeMonitorForm;
+import group.fire_monitor.pojo.form.GraphDataForm;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
@@ -57,13 +58,27 @@ public class MonitorController {
             return new UniversalResponse<>().success();
     }
 
-    @PostMapping("/selectById")
+    @PostMapping("/selectTableById")
     @ResponseBody
     @ApiOperation("查询某实例单次详细数据")
     public UniversalResponse<?> selectDetailByid(@RequestParam Integer id) {
         try{
             Monitor monitor= monitorMapper.selectById(id);
             return new UniversalResponse<>().success(monitorService.getSingleMonitorData(monitor));
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
+    }
+
+
+    @PostMapping("/selectGraphById")
+    @ResponseBody
+    @ApiOperation("查询某实例时间序列数据")
+    public UniversalResponse<?> selectGraphByid(@RequestBody GraphDataForm form) {
+        try{
+            Monitor monitor= monitorMapper.selectById(form.getMonitorId());
+            return new UniversalResponse<>().success(monitorService.getSequenceMonitorData(monitor,form.getStartTime(),form.getEndTime()));
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }
