@@ -1,14 +1,19 @@
 package group.fire_monitor.controller;
 
+import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.mapper.ResourceMapper;
+import group.fire_monitor.pojo.Monitor;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.service.ResourceService;
+import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Api(tags = "2:资源管理")
@@ -18,6 +23,8 @@ public class ResourceController {
     ResourceService resourceService;
     @Autowired
     ResourceMapper resourceMapper;
+    @Autowired
+    MonitorMapper monitorMapper;
     /*
     * 测试服务器能否联通
     * */
@@ -99,8 +106,13 @@ public class ResourceController {
     @ResponseBody
     @ApiOperation("删除软件资源")
     public UniversalResponse<?> deleteSoftware(@RequestParam Integer id) {
-
-        return resourceService.deleteSoftware(id);
+        List<Monitor> monitorList= monitorMapper.selectList(null);
+        for(Monitor monitor:monitorList){
+            if(CommonUtil.stringToList(monitor.getMonitorResourceIds()).contains(id)){
+                return new UniversalResponse<>(500,"软件资源仍在被监控，请先调整监控");
+            }
+        }
+        return new UniversalResponse<>().success(resourceService.deleteSoftware(id));
     }
 
     /*

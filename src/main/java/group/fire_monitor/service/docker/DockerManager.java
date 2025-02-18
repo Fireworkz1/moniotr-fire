@@ -18,7 +18,7 @@ public class DockerManager {
 
     public DockerManager(String ip) {
         // 创建 Docker 客户端实例
-        String url="tcp://"+ip+":2375";
+        String url="tcp://"+ip+":2357";
         this.dockerClient = DockerClientBuilder.getInstance(url).build();
     }
     public String createAndStartContainer(String imageName, String containerName) {
@@ -60,7 +60,7 @@ public class DockerManager {
         List<Container> containers = dockerClient.listContainersCmd().withShowAll(true).exec();
         for (Container container : containers) {
             // 获取容器的详细信息
-            if (Objects.requireNonNull(container.getPorts()[0].getPublicPort()).toString().equals(port)){
+            if (container.getPorts().length!=0&& Objects.requireNonNull(container.getPorts()[0].getPublicPort()).toString().equals(port)){
                 return container.getId();
 
         }

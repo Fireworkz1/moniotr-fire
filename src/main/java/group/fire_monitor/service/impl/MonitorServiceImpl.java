@@ -7,6 +7,7 @@ import group.fire_monitor.mapper.RelationGroupUserMapper;
 import group.fire_monitor.mapper.ResourceMapper;
 import group.fire_monitor.pojo.*;
 import group.fire_monitor.pojo.form.AddMonitorForm;
+import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.service.prometheus.PrometheusQueryExecutor;
 import group.fire_monitor.service.prometheus.PrometheusResponse;
@@ -120,6 +121,14 @@ public class MonitorServiceImpl implements MonitorService {
                 .like("monitor_description",str)
                 .eq("monitor_type",type);
         return monitorMapper.selectList(wrapper);
+    }
+
+    @Override
+    public void update(ChangeMonitorForm form) {
+        Monitor monitor= monitorMapper.selectById(form.getMonitorId());
+        monitor.setMonitorResourceIds(CommonUtil.listToString(form.getNewResourceIdList()));
+        monitorMapper.updateById(monitor);
+
     }
 
     private void checkAccessibility(Monitor monitor) {

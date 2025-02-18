@@ -6,6 +6,7 @@ import group.fire_monitor.pojo.Group;
 import group.fire_monitor.pojo.Monitor;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.AddMonitorForm;
+import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
@@ -32,6 +33,18 @@ public class MonitorController {
         return monitorService.create(form);
     }
 
+    @PostMapping("/update")
+    @ResponseBody
+    @ApiOperation("修改监控侦测对象")
+    public UniversalResponse<?> modify(@RequestBody ChangeMonitorForm form) {
+        try{
+            monitorService.update(form);
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>(500, e.getMessage());
+        }
+
+    }
 //    @PostMapping("/update")
 //
 //    @ResponseBody

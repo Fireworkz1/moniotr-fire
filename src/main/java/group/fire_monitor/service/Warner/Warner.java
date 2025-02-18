@@ -45,9 +45,10 @@ public class Warner {
 
 
 
-    @Scheduled(fixedRate = 600000)
+    @Scheduled(fixedRate = 120000)
     public void checkWarning() {
         try{
+            System.out.println("当前系统时间：" + new java.util.Date());
             warning();
         } catch (Exception e) {
             e.printStackTrace();
@@ -173,11 +174,11 @@ public class Warner {
         System.out.println("warning"+type+":"+monitorName+":value="+value+" "+compareType
                 +"threshold="+ threshold);
     }
-    @Scheduled(fixedRate = 600000)
-    public void printCurrentTime() {
-        //warning();
-        System.out.println("当前系统时间：" + new java.util.Date());
-    }
+//    @Scheduled(fixedRate = 600000)
+//    public void printCurrentTime() {
+//        //warning();
+////        System.out.println("当前系统时间：" + new java.util.Date());
+//    }
 
 
 }

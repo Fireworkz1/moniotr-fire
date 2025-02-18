@@ -76,7 +76,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public UniversalResponse<?> addServer(ResourceCreateForm resourceCreateForm) {
         QueryWrapper<Resource> wrapper=new QueryWrapper<>();
-        wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp());
+        wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp()).eq("resource_type","server");
         List<Resource> resources=resourceMapper.selectList(wrapper);
         if(!resources.isEmpty())return new UniversalResponse<>(500,"当前ip服务器已经被监控");
         try{
@@ -143,9 +143,9 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public UniversalResponse<?> addSoftware(ResourceCreateForm resourceCreateForm) {
         QueryWrapper<Resource> wrapper=new QueryWrapper<>();
-        wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp());
+        wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp()).eq("resource_port",resourceCreateForm.getResource().getResourcePort()).eq("resource_type","software");
         List<Resource> resources=resourceMapper.selectList(wrapper);
-        if(!resources.isEmpty())return new UniversalResponse<>(500,"当前ip服务器已经被监控");
+        if(!resources.isEmpty())return new UniversalResponse<>(500,"当前资源(ip和端口)已经被监控");
         try{
 
             //注册资源表
