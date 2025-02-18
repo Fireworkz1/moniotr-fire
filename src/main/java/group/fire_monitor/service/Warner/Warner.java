@@ -1,10 +1,7 @@
 package group.fire_monitor.service.Warner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import group.fire_monitor.mapper.MonitorMapper;
-import group.fire_monitor.mapper.UserMapper;
-import group.fire_monitor.mapper.WarnHistoryMapper;
-import group.fire_monitor.mapper.WarnPolicyMapper;
+import group.fire_monitor.mapper.*;
 import group.fire_monitor.pojo.*;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.service.emailsender.EmailSender;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +32,8 @@ public class Warner {
     UserMapper userMapper;
     @Autowired
     WarnHistoryMapper warnHistoryMapper;
+    @Autowired
+    WarnContentMapper warnContentMapper;
 
     private final ExecutorService executorService;
 
@@ -55,11 +55,13 @@ public class Warner {
     }
 
     public void warning() {
-        List<WarnPolicy> warnTargetList=warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("is_active",1));
+        List<WarnPolicy> warnTargetList=warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("monitor_on",1));
         List<WarnPolicy> updateWarnList = Collections.synchronizedList(new ArrayList<>());
         List<WarnPolicy> moveToHistoryList = Collections.synchronizedList(new ArrayList<>());
+
         for (WarnPolicy policy : warnTargetList) {
             executorService.submit(() -> {
+                Date date=new Date();
                 Monitor monitor = monitorMapper.selectById(policy.getMonitorId());
                 List<PrometheusResult> resultList = monitorService.getMonitorData(monitor);
                 String flag="safe";
@@ -70,7 +72,6 @@ public class Warner {
                     if(CommonUtil.needToWarn(policy.getCompareType(),value, policy.getWarnThreshold())){
                         flag="active";
                         //如果需要告警
-                            //再处理告警
                         switch(policy.getWarnLevel()){
                             case 0:
                                 break;
@@ -97,6 +98,9 @@ public class Warner {
                         policy.setHasSentNotice(1);
                         policy.setWarnRepeatTimes(policy.getWarnRepeatTimes()+1);
                         policy.setCurrentStatus(WarnNoticeEnum.WARNING.getLevel());
+                        if(policy.getStartWarningTime()==null)
+                            policy.setStartWarningTime(date);
+                        policy.setLastWarningTime(date);
                     }else{
                         if(policy.getIsActive()==1){
                             moveToHistoryList.add(policy);
@@ -104,6 +108,8 @@ public class Warner {
                             policy.setHasSentNotice(0);
                             policy.setWarnRepeatTimes(0);
                             policy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
+                            policy.setLastWarningTime(null);
+                            policy.setStartWarningTime(null);
 
                         }
                     }
@@ -154,6 +160,12 @@ public class Warner {
         warnContent.setWarnDescription(policy.getWarnDescription());
         warnContent.setWarnContent("warning[LEVEL=LOG_TO_DB]:"+monitor.getMonitorName()+":value="+value+" "+policy.getCompareType()
                 +"threshold="+ policy.getWarnThreshold());
+        warnContent.setWarnLevel(policy.getWarnLevel());
+        warnContent.setWarnName(policy.getWarnName());
+        warnContent.setWarnSourcetype(policy.getWarnSourceType());
+        warnContent.setWarnSource(policy.getWarnSource());
+        warnContent.setWarnTime(new Date());
+        warnContentMapper.insert(warnContent);
     }
 
 

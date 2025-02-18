@@ -35,6 +35,8 @@ public class WarnServiceImpl implements WarnService {
         warnPolicy.setNoticeUserIds(CommonUtil.listToString(form.getNoticeUserIds()));
         warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
         warnPolicy.setLastWarningTime(null);
+        warnPolicy.setStartWarningTime(null);
+        warnPolicy.setMonitorOn(0);
         warnPolicy.setIsActive(0);
         warnPolicy.setHasSentNotice(0);
         warnPolicyMapper.insert(warnPolicy);
@@ -48,6 +50,7 @@ public class WarnServiceImpl implements WarnService {
         QueryWrapper<WarnPolicy> wrapper=new QueryWrapper<>();
         wrapper.like("warn_name",str)
                 .like("warn_description",str)
+                .orderByDesc("monitor_on").orderByDesc("is_active")
                 ;
         List<WarnPolicy> policies=warnPolicyMapper.selectList(wrapper)
                 .stream().filter(policy-> {
@@ -61,7 +64,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     @Transactional
     public void delete(Integer id) {
-        //TODO:删除powerjob任务
+
         warnPolicyMapper.deleteById(id);
     }
 

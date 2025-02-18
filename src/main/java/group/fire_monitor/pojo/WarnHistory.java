@@ -9,6 +9,7 @@ import java.util.Date;
 @TableName("warn_policy_history")
 public class WarnHistory {
     private Integer id;
+    private Integer monitorOn;
     private String warnName;
     private Integer warnLevel;
     private String warnSource;
@@ -20,8 +21,10 @@ public class WarnHistory {
     private Integer monitorId;
     private String noticeUserIds;
     private Integer currentStatus;
+    private Date StartWarningTime;
     private Date lastWarningTime;
     private Integer isActive;
     private Integer hasSentNotice;
     private String noticeWay;
+
 }

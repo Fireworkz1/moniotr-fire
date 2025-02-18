@@ -1,7 +1,10 @@
 package group.fire_monitor.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import group.fire_monitor.mapper.WarnHistoryMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
 import group.fire_monitor.pojo.Monitor;
+import group.fire_monitor.pojo.WarnHistory;
 import group.fire_monitor.pojo.WarnPolicy;
 import group.fire_monitor.pojo.form.AddMonitorForm;
 import group.fire_monitor.pojo.form.AddWarnForm;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Api(tags = "4:告警管理")
@@ -22,6 +26,8 @@ public class WarnController {
     private WarnService warnService;
     @Autowired
     private WarnPolicyMapper warnPolicyMapper;
+    @Autowired
+    private WarnHistoryMapper warnHistoryMapper;
     @PostMapping("/create")
     @ResponseBody
     @ApiOperation("创建告警策略")
@@ -61,12 +67,15 @@ public class WarnController {
 //        }
 //    }
 
-    @PostMapping("/selectLike")
+    @PostMapping("/getWarn")
     @ResponseBody
-    @ApiOperation("模糊查询告警实例")
-    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str) {
+    @ApiOperation("查询告警（告警中优先）")
+    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str,@RequestParam(required = false) Integer onlyWarning) {
         try{
             List<WarnPolicy> policies= warnService.selectLike(str);
+            if(onlyWarning==1){
+                policies=policies.stream().filter(policy -> policy.getIsActive()==1).collect(Collectors.toList());
+            }
             return new UniversalResponse<>().success(policies);
         }catch (RuntimeException e){
             return new UniversalResponse<>(500,e.getMessage());
@@ -74,13 +83,13 @@ public class WarnController {
 
     }
 
-    @PostMapping("/changeActive")
+    @PostMapping("/changeMonitorOn")
     @ResponseBody
-    @ApiOperation("更改活跃状态")
-    public UniversalResponse<?> changeActive(@RequestParam Integer id,@RequestParam Integer changeTo) {
+    @ApiOperation("更改是否监控状态")
+    public UniversalResponse<?> changeActive(@RequestParam Integer id,@RequestParam Integer monitorOn) {
         try{
             WarnPolicy policie= warnPolicyMapper.selectById(id);
-            policie.setIsActive(changeTo);
+            policie.setMonitorOn(monitorOn);
             warnPolicyMapper.updateById(policie);
             return new UniversalResponse<>().success();
         }catch (RuntimeException e){
@@ -89,4 +98,18 @@ public class WarnController {
 
     }
 
+
+
+
+    @PostMapping("/warnhistory")
+    @ResponseBody
+    @ApiOperation("查看历史")
+    public UniversalResponse<?> getHistory(@RequestParam(required = false) String str) {
+
+        List<WarnHistory> histories=warnHistoryMapper.selectList(new QueryWrapper<WarnHistory>().like("warn_name",str)
+                .like("warn_description",str)
+                .orderByDesc("monitor_on").orderByDesc("is_active"));
+
+        return new UniversalResponse<>().success(histories);
+    }
 }
