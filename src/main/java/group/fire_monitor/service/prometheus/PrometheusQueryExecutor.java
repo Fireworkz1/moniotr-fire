@@ -11,14 +11,19 @@ public class PrometheusQueryExecutor {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String prometheusUrl = "http://8.130.20.137:9090/api/v1/query";
 
-    public PrometheusResponse executeQuery(String query,Date start,Date end) {
+    public PrometheusResponse executeQuery(String query, Date start, Date end) {
+        // 将 Date 转换为 Unix 时间戳（秒）
+        long startTimestamp = start.getTime() / 1000; // 转换为秒
+        long endTimestamp = end.getTime() / 1000;     // 转换为秒
 
+        // 构造查询 URL
+        String url = prometheusUrl + "/api/v1/query_range?query={query}&start={start}&end={end}&step=15s";
 
-            String url = prometheusUrl + "?query={query}";
-            String ans=restTemplate.getForObject(url,String.class,query);
-            return PrometheusResponseParser.parse(ans);
+        // 发起 HTTP 请求
+        String response = restTemplate.getForObject(url, String.class, query, startTimestamp, endTimestamp);
 
-
+        // 解析响应
+        return PrometheusResponseParser.parse(response);
     }
 
     public PrometheusResponse executeQuery(String query) {
