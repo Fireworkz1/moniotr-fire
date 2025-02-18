@@ -63,7 +63,7 @@ public class ResourceController {
     public UniversalResponse<?> selectServerbyid(@RequestParam(required = false) Integer id) {
         Resource resource= resourceMapper.selectById(id);
         if(resource!=null){
-            return new UniversalResponse<>().success() ;
+            return new UniversalResponse<>().success(resource) ;
         }
         return new UniversalResponse<>(500,"找不到资源");
     }
@@ -130,7 +130,7 @@ public class ResourceController {
     public UniversalResponse<?> selectSoftwarebyid(@RequestParam(required = false) Integer id) {
         Resource resource= resourceMapper.selectById(id);
         if(resource!=null){
-            return new UniversalResponse<>().success() ;
+            return new UniversalResponse<>().success(resource) ;
         }
         return new UniversalResponse<>(500,"找不到资源");
     }

@@ -1,10 +1,7 @@
 package group.fire_monitor.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
-import group.fire_monitor.pojo.Group;
 import group.fire_monitor.pojo.Monitor;
-import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.AddMonitorForm;
 import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.service.MonitorService;
@@ -14,9 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @Api(tags = "3:监控实例")
@@ -64,11 +59,11 @@ public class MonitorController {
 
     @PostMapping("/selectById")
     @ResponseBody
-    @ApiOperation("查询某实例详细数据")
+    @ApiOperation("查询某实例单次详细数据")
     public UniversalResponse<?> selectDetailByid(@RequestParam Integer id) {
         try{
             Monitor monitor= monitorMapper.selectById(id);
-            return new UniversalResponse<>().success(monitorService.getMonitorData(monitor));
+            return new UniversalResponse<>().success(monitorService.getSingleMonitorData(monitor));
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }

@@ -10,7 +10,6 @@ import group.fire_monitor.util.enums.WarnNoticeEnum;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class Warner {
             executorService.submit(() -> {
                 Date date=new Date();
                 Monitor monitor = monitorMapper.selectById(policy.getMonitorId());
-                List<PrometheusResult> resultList = monitorService.getMonitorData(monitor);
+                List<PrometheusResult> resultList = monitorService.getSingleMonitorData(monitor);
                 String flag="safe";
                 for (PrometheusResult result : resultList) {
                     Double value= (Double) result.getValue().get(1);

@@ -17,7 +17,7 @@ import group.fire_monitor.pojo.res.MonitorDataRes;
 import group.fire_monitor.util.response.UniversalResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,12 +83,12 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public List<PrometheusResult> getMonitorData(Monitor monitor) {
+    public List<PrometheusResult> getSingleMonitorData(Monitor monitor) {
         List<PrometheusResult> rawResults=new ArrayList<>();
         if (monitor.getMonitorIspreset()==1)
-            rawResults= getData(monitor.getMonitorPresetTarget());
+            rawResults= getData(monitor.getMonitorPresetTarget(),"table",null,null);
         else
-            rawResults= prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql()).getResults();
+            rawResults= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql())) .getResults();
 
 
         //TODO：使用redis优化函数运行速度
@@ -133,7 +133,7 @@ public class MonitorServiceImpl implements MonitorService {
 
     private void checkAccessibility(Monitor monitor) {
         if(monitor.getMonitorIspreset()==1)
-            checkPreset(monitor.getMonitorPresetTarget());
+            checkPreset(monitor.getMonitorPresetTarget(),"table");
         else
             checkNotPreset(monitor.getMonitorNotpresetPromql());
     }
@@ -142,64 +142,80 @@ public class MonitorServiceImpl implements MonitorService {
     private void checkNotPreset(String promql)  {
         prometheusQueryExecutor.custom(promql);
     }
-    private void checkPreset(String target){
-        getData(target);
+    private void checkPreset(String target,String type){
+        getData(target,type,null,null);
     }
 
     //获取数据
-    private List<PrometheusResult> getData(String target) {
-        try{
-            PrometheusResponse response = null;
+    private List<PrometheusResult> getData(String target,String type,Date start,Date end) {
+        try {
+            String query;
             switch (target){
                 case "server_file_free_gb":
-                    response= prometheusQueryExecutor.server_file_free_gb();
+                    query= prometheusQueryExecutor.server_file_free_gb();
                     break;
                 case "server_load_1min":
-                    response= prometheusQueryExecutor.server_load_1min();
+                    query= prometheusQueryExecutor.server_load_1min();
                     break;
                 case "server_cpu_usage_1min":
-                    response= prometheusQueryExecutor.server_cpu_usage_1min();
+                    query= prometheusQueryExecutor.server_cpu_usage_1min();
                     break;
                 case "server_memory_usage_1min":
-                    response= prometheusQueryExecutor.server_memory_usage_1min();
+                    query= prometheusQueryExecutor.server_memory_usage_1min();
                     break;
                 case "server_cpu_context_switches_5m":
-                    response= prometheusQueryExecutor.server_cpu_context_switches_5m();
+                    query= prometheusQueryExecutor.server_cpu_context_switches_5m();
                     break;
                 case "server_disk_input_rate_5m":
-                    response= prometheusQueryExecutor.server_disk_input_rate_5m();
+                    query= prometheusQueryExecutor.server_disk_input_rate_5m();
                     break;
                 case "server_disk_output_rate_5m":
-                    response= prometheusQueryExecutor.server_disk_output_rate_5m();
+                    query= prometheusQueryExecutor.server_disk_output_rate_5m();
                     break;
                 case "server_processes_running":
-                    response= prometheusQueryExecutor.server_processes_running();
+                    query= prometheusQueryExecutor.server_processes_running();
                     break;
                 case "server_threads_running":
-                    response= prometheusQueryExecutor.server_threads_running();
+                    query= prometheusQueryExecutor.server_threads_running();
                     break;
 
-                    /*
-                    * 软件指标
-                    * */
+                /*
+                 * 软件指标
+                 * */
                 case "software_jvm_nonheap_memory_usage":
-                    response= prometheusQueryExecutor.software_jvm_nonheap_memory_usage();
+                    query= prometheusQueryExecutor.software_jvm_nonheap_memory_usage();
                     break;
                 case "software_jvm_heap_memory_usage":
-                    response= prometheusQueryExecutor.software_jvm_heap_memory_usage();
+                    query= prometheusQueryExecutor.software_jvm_heap_memory_usage();
                     break;
                 case "software_jvm_gc_times_5min":
-                    response= prometheusQueryExecutor.software_jvm_gc_times_5min();
+                    query= prometheusQueryExecutor.software_jvm_gc_times_5min();
                     break;
                 case "software_jvm_threads_number":
-                    response= prometheusQueryExecutor.software_jvm_threads_number();
+                    query= prometheusQueryExecutor.software_jvm_threads_number();
                     break;
 
                 default:
-                    throw new RuntimeException("请输入正确的监测指标");
-            }
+                    throw new RuntimeException("请输入正确的监测指标");}
 
-            return response.getResults();
+            PrometheusResponse response=new PrometheusResponse();
+                    if(Objects.equals(type, "table")){
+                        response= prometheusQueryExecutor.executeQuery(query);
+                    }else{
+                        if(end==null){
+                            end=new Date();
+                        }
+                        if(start==null){
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(end);
+                            calendar.add(Calendar.MINUTE, -30); // 减去 60 分钟
+                            start = calendar.getTime();
+
+                        }
+                        response=prometheusQueryExecutor.executeQuery(query,start,end);
+                    }
+
+            return   response.getResults();
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }

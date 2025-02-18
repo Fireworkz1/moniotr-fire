@@ -18,6 +18,7 @@ public class PrometheusResult {
         private String job;
         private String id;
 
+        private String domainname;
         private String machine;
         private String nodename;
         private String sysname;

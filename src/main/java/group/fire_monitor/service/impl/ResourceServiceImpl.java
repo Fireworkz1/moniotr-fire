@@ -284,7 +284,7 @@ public class ResourceServiceImpl implements ResourceService {
         softwareDetailRes.setResourceDescription(resource.getResourceDescription());
         softwareDetailRes.setExporterType("micrometer");
         try {
-            PrometheusResponse response = prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort());
+            PrometheusResponse response = prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort()));
             if(response.getData().getResult().isEmpty())return new UniversalResponse<>(500,"资源未在prometheus配置");
             softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
             softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
@@ -311,7 +311,7 @@ public class ResourceServiceImpl implements ResourceService {
         hardwareDetailRes.setResourceDescription(resource.getResourceDescription());
         hardwareDetailRes.setExporterType("node_exporter");
         try {
-            PrometheusResponse prometheusResponse=prometheusQueryExecutor.up_single(resource.getResourceIp(),"9100");
+            PrometheusResponse prometheusResponse= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.up_single(resource.getResourceIp(),"9100"));
             if(prometheusResponse.getSingleResult().getValue().isEmpty())return new UniversalResponse<>(500,"资源未在prometheus配置");
             PrometheusResult result=prometheusResponse.getSingleResult();
             hardwareDetailRes.setPrometheusInstance(result.getMetric().getInstance());
@@ -320,11 +320,11 @@ public class ResourceServiceImpl implements ResourceService {
             if (hardwareDetailRes.getPrometheusUp()==0){
                 return new UniversalResponse<>().success(hardwareDetailRes);
             }
-            hardwareDetailRes.setPrometheusAvailableFileGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_file_free_gb_single(resource.getResourceIp()).getSingleValue()))));
-            hardwareDetailRes.setPrometheusTotalMemoryGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.server_memory_gb_single(resource.getResourceIp()).getSingleValue()))));
-            hardwareDetailRes.setPrometheusServerloadtime(prometheusQueryExecutor.server_running_seconds_single(resource.getResourceIp()).getSingleValue());
-            hardwareDetailRes.setPrometheusCpuNums(prometheusQueryExecutor.server_cpu_nums_single(resource.getResourceIp()).getSingleResult().getValue().get(1).toString());
-            PrometheusResult result1= prometheusQueryExecutor.server_basic_data_single(resource.getResourceIp()).getSingleResult();
+            hardwareDetailRes.setPrometheusAvailableFileGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.server_file_free_gb_single(resource.getResourceIp())).getSingleValue()))));
+            hardwareDetailRes.setPrometheusTotalMemoryGBs(Double.valueOf(String.format("%.2f",Double.valueOf(prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.server_memory_gb_single(resource.getResourceIp())).getSingleValue()))));
+            hardwareDetailRes.setPrometheusServerloadtime(prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.server_running_seconds_single(resource.getResourceIp())).getSingleValue());
+            hardwareDetailRes.setPrometheusCpuNums(prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.server_cpu_nums_single(resource.getResourceIp())).getSingleResult().getValue().get(1).toString());
+            PrometheusResult result1= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.server_basic_data_single(resource.getResourceIp())).getSingleResult();
             hardwareDetailRes.setSysname(result1.getMetric().getSysname());
             hardwareDetailRes.setVersion(result1.getMetric().getVersion());
             hardwareDetailRes.setNodename(result1.getMetric().getNodename());
