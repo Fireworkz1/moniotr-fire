@@ -9,7 +9,7 @@ import java.util.Date;
 @Service
 public class PrometheusQueryExecutor {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String prometheusUrl = "http://8.130.20.137:9090/api/v1/query";
+    private final String prometheusUrl = "http://8.130.20.137:9090";
 
     public PrometheusResponse executeQuery(String query, Date start, Date end) {
         // 将 Date 转换为 Unix 时间戳（秒）
@@ -29,7 +29,7 @@ public class PrometheusQueryExecutor {
     public PrometheusResponse executeQuery(String query) {
 
 
-        String url = prometheusUrl + "?query={query}";
+        String url = prometheusUrl + "/api/v1/query?query={query}";
         String ans=restTemplate.getForObject(url,String.class,query);
         return PrometheusResponseParser.parse(ans);
 
