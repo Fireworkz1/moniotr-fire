@@ -17,7 +17,7 @@ public enum ResponseEnum {
      */
     USER_LOGIN_SUCCESS(2000, "登录成功"),
     USER_TOKEN_ERROR(2001, "用户token错误"),
-    USER_LOGIN_ERROR(2002, "账号不存在或密码错误"),
+    USER_LOGIN_ERROR(500, "账号不存在或密码错误"),
     USER_ACCOUNT_EXISTS(2003, "账户已存在"),
     USER_NO_PERMISSION(2004, "用户权限不足"),
     USER_MATCH_ERROR(2005,"用户登录状态和参数不匹配"),

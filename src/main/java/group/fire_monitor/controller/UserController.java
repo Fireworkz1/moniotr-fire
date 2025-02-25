@@ -57,7 +57,12 @@ public class UserController {
     @ResponseBody
     @JWTPass
     public UniversalResponse<?> login(@RequestBody LoginForm loginForm) {
-        return userService.login(loginForm);
+        try{
+            return userService.login(loginForm);
+        }catch (Exception e){
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
     }
 
     /*
@@ -206,5 +211,16 @@ public class UserController {
             return new UniversalResponse<>(500,e.getMessage());
         }
 
+    }
+
+    @GetMapping("current")
+    @ApiOperation("返回当前用户信息")
+    @ResponseBody
+    public UniversalResponse<?> user_(){
+        try {
+            return new UniversalResponse<>().success(userMapper.selectById(JWTUtil.getCurrentUser().getId()));
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
     }
 }

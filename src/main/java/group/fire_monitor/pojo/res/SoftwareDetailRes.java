@@ -11,10 +11,11 @@ public class SoftwareDetailRes {
     String resouceName;
     String resouceIp;
     String resourceType;
-    String startMode;
-    String resourcePort;
-    String resourceDescription;
     String exporterType;
+    String resourceDescription;
+
+    String resourcePort;
+    String startMode;
 
 
 }

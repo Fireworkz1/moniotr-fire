@@ -37,10 +37,11 @@ public class UserServicelmpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> wrapper=new QueryWrapper<>();
         wrapper.eq("account",loginForm.getAccount());
         List<User> users=userMapper.selectList(wrapper);
-        User user = users.get(0);
-        if (user == null) {
+        
+        if (users.isEmpty()) {
             throw new ResponseException(ResponseEnum.USER_LOGIN_ERROR.getCode(), ResponseEnum.USER_LOGIN_ERROR.getMsg());
         }
+        User user = users.get(0);
         if (!user.getPassword().equals(loginForm.getPassword())) {
             throw new ResponseException(ResponseEnum.USER_LOGIN_ERROR.getCode(), ResponseEnum.USER_LOGIN_ERROR.getMsg());
         }
