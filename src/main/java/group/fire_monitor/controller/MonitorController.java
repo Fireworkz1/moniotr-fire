@@ -39,18 +39,18 @@ public class MonitorController {
         return monitorService.create(form);
     }
 
-    @PostMapping("/update")
-    @ResponseBody
-    @ApiOperation("修改监控侦测对象")
-    public UniversalResponse<?> modify(@RequestBody ChangeMonitorForm form) {
-        try{
-            monitorService.update(form);
-            return new UniversalResponse<>().success();
-        } catch (Exception e) {
-            return new UniversalResponse<>(500, e.getMessage());
-        }
-
-    }
+//    @PostMapping("/update")
+//    @ResponseBody
+//    @ApiOperation("修改监控侦测对象")
+//    public UniversalResponse<?> modify(@RequestBody ChangeMonitorForm form) {
+//        try{
+//            monitorService.update(form);
+//            return new UniversalResponse<>().success();
+//        } catch (Exception e) {
+//            return new UniversalResponse<>(500, e.getMessage());
+//        }
+//
+//    }
     @PostMapping("/update")
     @Transactional
     @ResponseBody

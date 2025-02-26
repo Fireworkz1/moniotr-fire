@@ -80,7 +80,7 @@ public class UserController {
     /*
     * 更改人员权限（仅admin）
     * */
-    @PostMapping("changePermissionLevel")
+    @PostMapping("/changePermissionLevel")
     @ApiOperation("更改人员权限(暂时不使用)")
     @ResponseBody
     public  UniversalResponse<?> changePermission(@RequestBody ChangePermissionForm changePermissionForm){
@@ -90,7 +90,7 @@ public class UserController {
     /*
     * 创建分组
     * */
-    @PostMapping("createGroup")
+    @PostMapping("/createGroup")
     @ApiOperation("创建分组")
     @Transactional
     @ResponseBody
@@ -127,7 +127,7 @@ public class UserController {
     /*
     * 设置人员分组
     * */
-    @PostMapping("changeGroupMember")
+    @PostMapping("/changeGroupMember")
     @ApiOperation("更改分组中人员")
     @ResponseBody
     public  UniversalResponse<?> changeGroup(@RequestBody ChangeGroupMemberForm changeGroupMemberForm){
@@ -160,7 +160,7 @@ public class UserController {
     /*
     * 查询人员分组
     * */
-    @GetMapping("selectGroupInfo")
+    @GetMapping("/selectGroupInfo")
     @ApiOperation("查询全部分组信息")
     @ResponseBody
     public  UniversalResponse<?> groupInfo(){
@@ -186,7 +186,7 @@ public class UserController {
     /*
      * 查询全部人员
      * */
-    @GetMapping("selectUser")
+    @GetMapping("/selectUser")
     @ApiOperation("查询全部人员")
     @ResponseBody
     public  UniversalResponse<?> user(){
@@ -200,7 +200,7 @@ public class UserController {
 
     }
 
-    @GetMapping("selectGroup")
+    @GetMapping("/selectGroup")
     @ApiOperation("查询当前用户属于分组")
     @ResponseBody
     public  UniversalResponse<?> group(){
@@ -213,7 +213,7 @@ public class UserController {
 
     }
 
-    @GetMapping("current")
+    @GetMapping("/current")
     @ApiOperation("返回当前用户信息")
     @ResponseBody
     public UniversalResponse<?> user_(){
@@ -224,7 +224,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("changeUserInfo")
+    @PostMapping("/changeUserInfo")
     @ApiOperation("修改当前用户信息")
     @ResponseBody
     public UniversalResponse<?> changeuser_(User user){
