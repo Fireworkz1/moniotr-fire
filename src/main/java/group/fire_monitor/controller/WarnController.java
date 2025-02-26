@@ -40,6 +40,18 @@ public class WarnController {
         }
     }
 
+    @PostMapping("/update")
+    @ResponseBody
+    @ApiOperation("修改告警策略")
+    public UniversalResponse<?> update(@RequestBody WarnPolicy form) {
+        try{
+            warnPolicyMapper.updateById(form);
+            return new UniversalResponse<>().success();
+        }catch (RuntimeException e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+    }
+
 
 
 
@@ -74,6 +86,18 @@ public class WarnController {
         try{
             List<WarnPolicy> policies= warnService.selectLike(str);
             return new UniversalResponse<>().success(policies);
+        }catch (RuntimeException e){
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
+    }
+    @PostMapping("/getWarnByid")
+    @ResponseBody
+    @ApiOperation("查询告警（byid）")
+    public UniversalResponse<?> selectById(@RequestParam Integer id) {
+        try{
+            WarnPolicy policy= warnPolicyMapper.selectById(id);
+            return new UniversalResponse<>().success(policy);
         }catch (RuntimeException e){
             return new UniversalResponse<>(500,e.getMessage());
         }
