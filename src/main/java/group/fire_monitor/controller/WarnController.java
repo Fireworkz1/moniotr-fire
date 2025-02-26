@@ -70,12 +70,9 @@ public class WarnController {
     @PostMapping("/getWarn")
     @ResponseBody
     @ApiOperation("查询告警（告警中优先）")
-    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str,@RequestParam(required = false) Integer onlyWarning) {
+    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str) {
         try{
             List<WarnPolicy> policies= warnService.selectLike(str);
-            if(onlyWarning==1){
-                policies=policies.stream().filter(policy -> policy.getIsActive()==1).collect(Collectors.toList());
-            }
             return new UniversalResponse<>().success(policies);
         }catch (RuntimeException e){
             return new UniversalResponse<>(500,e.getMessage());

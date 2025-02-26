@@ -223,4 +223,15 @@ public class UserController {
             return new UniversalResponse<>(500,e.getMessage());
         }
     }
+
+    @GetMapping("changeUserInfo")
+    @ApiOperation("修改当前用户信息")
+    @ResponseBody
+    public UniversalResponse<?> changeuser_(User user){
+        try {
+            return new UniversalResponse<>().success(userMapper.updateById(user));
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+    }
 }

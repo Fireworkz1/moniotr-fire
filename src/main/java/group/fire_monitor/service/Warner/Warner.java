@@ -97,7 +97,7 @@ public class Warner {
                         policy.setIsActive(1);
                         policy.setHasSentNotice(1);
                         policy.setWarnRepeatTimes(policy.getWarnRepeatTimes()+1);
-                        policy.setCurrentStatus(WarnNoticeEnum.WARNING.getLevel());
+//                        policy.setCurrentStatus(WarnNoticeEnum.WARNING.getLevel());
                         if(policy.getStartWarningTime()==null)
                             policy.setStartWarningTime(date);
                         policy.setLastWarningTime(date);
@@ -107,7 +107,7 @@ public class Warner {
                             policy.setIsActive(0);
                             policy.setHasSentNotice(0);
                             policy.setWarnRepeatTimes(0);
-                            policy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
+//                            policy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
                             policy.setLastWarningTime(null);
                             policy.setStartWarningTime(null);
 

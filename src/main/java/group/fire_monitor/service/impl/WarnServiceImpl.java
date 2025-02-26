@@ -33,7 +33,7 @@ public class WarnServiceImpl implements WarnService {
         warnPolicy.setCompareType(form.getCompareType());
         warnPolicy.setMonitorId(form.getMonitorId());
         warnPolicy.setNoticeUserIds(CommonUtil.listToString(form.getNoticeUserIds()));
-        warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
+//        warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
         warnPolicy.setLastWarningTime(null);
         warnPolicy.setStartWarningTime(null);
         warnPolicy.setMonitorOn(0);

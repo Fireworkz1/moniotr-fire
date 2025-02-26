@@ -20,7 +20,7 @@ public class WarnPolicy {
     private String warnDescription;
     private Integer monitorId;
     private String noticeUserIds;
-    private Integer currentStatus;
+//    private Integer currentStatus;
     private Date StartWarningTime;
     private Date lastWarningTime;
     private Integer isActive;
