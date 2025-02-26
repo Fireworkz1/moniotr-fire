@@ -10,6 +10,6 @@ import lombok.Data;
 public class RelationGroupUser {
     @TableId(type = IdType.AUTO)
     Integer id;
-    Integer user_id;
-    Integer group_id;
+    Integer userId;
+    Integer groupId;
 }

@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @Api(tags = "1:注册登录和账号管理")
@@ -95,9 +96,9 @@ public class UserController {
     @Transactional
     @ResponseBody
     public  UniversalResponse<?> createGroup(@RequestBody CreateGroupForm createGroupForm){
-        if(!Objects.equals(JWTUtil.getCurrentUser().getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel())){
-            return new UniversalResponse<>(500,"权限不足");
-        }
+//        if(!Objects.equals(JWTUtil.getCurrentUser().getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel())){
+//            return new UniversalResponse<>(500,"权限不足");
+//        }
         try{
             QueryWrapper<Group> wrapper=new QueryWrapper<>();
             wrapper.eq("name",createGroupForm.getGroupName());
@@ -112,10 +113,10 @@ public class UserController {
             groupMapper.insert(group);
             Integer groupId=group.getId();
             RelationGroupUser groupUser=new RelationGroupUser();
-            groupUser.setGroup_id(groupId);
+            groupUser.setGroupId(groupId);
             for(Integer userId:createGroupForm.getUserIds()){
                 groupUser.setId(null);
-                groupUser.setUser_id(userId);
+                groupUser.setUserId(userId);
                 groupUserMapper.insert(groupUser);
             }
             return new UniversalResponse<>(200,"success");
@@ -137,7 +138,10 @@ public class UserController {
         Group group=groupMapper.selectById(changeGroupMemberForm.getGroupId());
         if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))&&
             group.getGroupLeaderId()!=currentUser.getId()){
-            return new UniversalResponse<>(500,"您没有权限修改分组");
+            return new UniversalResponse<>(500,"您不是当前分组负责人，没有权限修改分组");
+        }
+        if(!changeGroupMemberForm.getUserIdList().contains(JWTUtil.getCurrentUser().getId())){
+            return new UniversalResponse<>(500,"分组负责人必须在分组中");
         }
         try{
             QueryWrapper<RelationGroupUser> wrapper=new QueryWrapper<>();
@@ -145,8 +149,8 @@ public class UserController {
             groupUserMapper.delete(wrapper);
             for(Integer userId:changeGroupMemberForm.getUserIdList()){
                 RelationGroupUser relationGroupUser=new RelationGroupUser();
-                relationGroupUser.setGroup_id(changeGroupMemberForm.getGroupId());
-                relationGroupUser.setUser_id(userId);
+                relationGroupUser.setGroupId(changeGroupMemberForm.getGroupId());
+                relationGroupUser.setUserId(userId);
                 groupUserMapper.insert(relationGroupUser);
             }
             return new UniversalResponse<>().success();
@@ -205,7 +209,9 @@ public class UserController {
     @ResponseBody
     public  UniversalResponse<?> group(){
         try{
-            return new UniversalResponse<>().success(groupMapper.selectList(new QueryWrapper<Group>().eq("user_id",JWTUtil.getCurrentUser().getId()))) ;
+            List<Integer> groupIds=groupUserMapper.selectList(new QueryWrapper<RelationGroupUser>().eq("user_id",JWTUtil.getCurrentUser().getId())).stream().map(RelationGroupUser::getGroupId).collect(Collectors.toList());
+            List<Group> groups=groupMapper.selectBatchIds(groupIds);
+            return new UniversalResponse<>().success(groups) ;
         }catch (Exception e){
             e.printStackTrace();
             return new UniversalResponse<>(500,e.getMessage());
@@ -227,8 +233,9 @@ public class UserController {
     @PostMapping("/changeUserInfo")
     @ApiOperation("修改当前用户信息")
     @ResponseBody
-    public UniversalResponse<?> changeuser_(User user){
+    public UniversalResponse<?> changeuser_(@RequestBody User user){
         try {
+            user.setId(JWTUtil.getCurrentUser().getId());
             return new UniversalResponse<>().success(userMapper.updateById(user));
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());

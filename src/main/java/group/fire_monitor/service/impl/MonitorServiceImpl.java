@@ -68,7 +68,7 @@ public class MonitorServiceImpl implements MonitorService {
                 User user= JWTUtil.getCurrentUser();
                 QueryWrapper<RelationGroupUser> userwrapper=new QueryWrapper<>();
                 userwrapper.eq("user_id",user.getId());
-                List<Integer> groupIds=relationGroupUserMapper.selectList(userwrapper).stream().map(RelationGroupUser::getGroup_id).collect(Collectors.toList());
+                List<Integer> groupIds=relationGroupUserMapper.selectList(userwrapper).stream().map(RelationGroupUser::getGroupId).collect(Collectors.toList());
                 monitor.setMonitorGroupIds(CommonUtil.listToString(groupIds));
             }
             monitor.setMonitorResourceIds(CommonUtil.listToString(form.getMonitorResourceIds()));

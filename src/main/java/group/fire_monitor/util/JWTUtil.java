@@ -35,7 +35,7 @@ public class JWTUtil {
 
     public static User getCurrentUser() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String token = request.getHeader("token");
+        String token = request.getHeader("Authorization").substring(7);
         if (Strings.isNotBlank(token)) {
             return staticUserMapper.selectById(Integer.valueOf(JWT.decode(token).getAudience().get(0)));
         }

@@ -27,27 +27,32 @@ public class JWTInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
-            // 之前一堆bug就是因为预检机制
             System.out.println("OPTIONS放行");
             return true;
         }
+
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("/doc.html") ||requestURI.contains("/favicon.ico") || requestURI.contains("/v2/api-docs") || requestURI.contains("/swagger-resources") || requestURI.contains("/webjars")) {
+        if (requestURI.contains("/doc.html") || requestURI.contains("/favicon.ico") || requestURI.contains("/v2/api-docs") || requestURI.contains("/swagger-resources") || requestURI.contains("/webjars")) {
             return true; // 放行Swagger UI的请求
         }
 
         // 检查handler是否是HandlerMethod的实例
         if (handler instanceof HandlerMethod) {
-            // 将handler强制转换为HandlerMethod
-            // 这样可以访问请求处理程序的详情信息
             HandlerMethod handlerMethod = (HandlerMethod) handler;
-            // 检验是否有注解
             if (handlerMethod.hasMethodAnnotation(JWTPass.class)) {
                 return true;    // 放行
             }
         }
 
-        String token = request.getHeader("token");
+        // 从 Authorization 请求头中获取 Token
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseException(ResponseEnum.USER_TOKEN_ERROR.getCode(), ResponseEnum.USER_TOKEN_ERROR.getMsg());
+        }
+
+        // 提取 Token
+        String token = authHeader.substring(7); // 去掉 "Bearer " 前缀
+
         if (Strings.isBlank(token)) {
             throw new ResponseException(ResponseEnum.USER_TOKEN_ERROR.getCode(), ResponseEnum.USER_TOKEN_ERROR.getMsg());
         }

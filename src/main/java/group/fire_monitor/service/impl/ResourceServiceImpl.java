@@ -251,7 +251,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<Integer> checkPermission(List<Integer> resourceIds) {
          List<Integer> userInGroupIds=relationGroupUserMapper.selectList(new QueryWrapper<RelationGroupUser>().eq("user_id",JWTUtil.getCurrentUser().getId()))
-                .stream().map(RelationGroupUser::getGroup_id).collect(Collectors.toList());
+                .stream().map(RelationGroupUser::getGroupId).collect(Collectors.toList());
         return relationGroupResourceMapper.selectPermittedResourceId(userInGroupIds);
     }
 
@@ -261,7 +261,7 @@ public class ResourceServiceImpl implements ResourceService {
         List<RelationGroupResource> list= relationGroupResourceMapper.selectList(new QueryWrapper<RelationGroupResource>().eq("resource_id",resourceId));
         List<Integer> groupIds=list.stream().map(RelationGroupResource::getGroupId).collect(Collectors.toList());
         List<Integer> userInGroupIds=relationGroupUserMapper.selectList(new QueryWrapper<RelationGroupUser>().eq("user_id",JWTUtil.getCurrentUser().getId()))
-                .stream().map(RelationGroupUser::getGroup_id).collect(Collectors.toList());
+                .stream().map(RelationGroupUser::getGroupId).collect(Collectors.toList());
 
         List<Integer> intersection = groupIds.stream()
                 .filter(userInGroupIds::contains) // 筛选出 list2 中存在的元素
