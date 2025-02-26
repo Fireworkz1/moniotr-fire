@@ -1,6 +1,7 @@
 package group.fire_monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
 import group.fire_monitor.pojo.Monitor;
 import group.fire_monitor.pojo.WarnPolicy;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 public class WarnServiceImpl implements WarnService {
     @Autowired
     WarnPolicyMapper warnPolicyMapper;
+    @Autowired
+    MonitorMapper monitorMapper;
     @Override
     @Transactional
     public void create(AddWarnForm form) {
@@ -32,6 +35,7 @@ public class WarnServiceImpl implements WarnService {
         warnPolicy.setWarnThreshold(form.getWarnThreshold());
         warnPolicy.setCompareType(form.getCompareType());
         warnPolicy.setMonitorId(form.getMonitorId());
+        warnPolicy.setMonitorName(form.getMonitorName());
         warnPolicy.setNoticeUserIds(CommonUtil.listToString(form.getNoticeUserIds()));
 //        warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
         warnPolicy.setLastWarningTime(null);

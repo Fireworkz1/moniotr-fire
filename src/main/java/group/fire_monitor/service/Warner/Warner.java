@@ -122,6 +122,8 @@ public class Warner {
         for(WarnPolicy policyhis: moveToHistoryList){
             WarnHistory history=new WarnHistory();
             BeanUtils.copyProperties(policyhis, history);
+            history.setWarnPolicyId(history.getId());
+            history.setId(null);
             warnHistoryList.add(history);
         }
         warnHistoryMapper.insert(warnHistoryList);

@@ -129,7 +129,7 @@ public class WarnController {
 
         List<WarnHistory> histories=warnHistoryMapper.selectList(new QueryWrapper<WarnHistory>().like("warn_name",str)
                 .like("warn_description",str)
-                .orderByDesc("monitor_on").orderByDesc("is_active"));
+                .orderByDesc("last_warning_time"));
 
         return new UniversalResponse<>().success(histories);
     }

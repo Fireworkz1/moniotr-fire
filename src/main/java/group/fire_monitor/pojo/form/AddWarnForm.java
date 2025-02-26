@@ -15,5 +15,6 @@ public class AddWarnForm {
 //    private Integer warnRepeatTimes;
     private String warnDescription;
     private Integer monitorId;
+    private String monitorName;
     List<Integer> noticeUserIds;
 }

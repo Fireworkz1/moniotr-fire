@@ -1,7 +1,12 @@
 package group.fire_monitor.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
+import group.fire_monitor.mapper.WarnHistoryMapper;
+import group.fire_monitor.mapper.WarnPolicyMapper;
 import group.fire_monitor.pojo.Monitor;
+import group.fire_monitor.pojo.WarnHistory;
+import group.fire_monitor.pojo.WarnPolicy;
 import group.fire_monitor.pojo.form.AddMonitorForm;
 import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.pojo.form.GraphDataForm;
@@ -10,6 +15,7 @@ import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +28,10 @@ public class MonitorController {
     MonitorService monitorService;
     @Autowired
     MonitorMapper monitorMapper;
+    @Autowired
+    WarnPolicyMapper warnPolicyMapper;
+    @Autowired
+    WarnHistoryMapper warnHistoryMapper;
     @PostMapping("/create")
     @ResponseBody
     @ApiOperation("创建监控实例")
@@ -41,13 +51,31 @@ public class MonitorController {
         }
 
     }
-//    @PostMapping("/update")
-//
-//    @ResponseBody
-//    @ApiOperation("修改实例")
-//    public UniversalResponse<?> update(@RequestBody Monitor monitor) {
-//        return null;
-//    }
+    @PostMapping("/update")
+    @Transactional
+    @ResponseBody
+    @ApiOperation("修改实例")
+    public UniversalResponse<?> update(@RequestBody Monitor monitor) {
+        try{
+            monitorMapper.updateById(monitor);
+            List<WarnPolicy> warnPolicys= warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("monitor_id",monitor.getId()));
+            for(WarnPolicy warnPolicy:warnPolicys){
+                warnPolicy.setMonitorName(monitor.getMonitorName());
+            }
+            warnPolicyMapper.updateById(warnPolicys);
+            List<WarnHistory> warnHis= warnHistoryMapper.selectList(new QueryWrapper<WarnHistory>().eq("monitor_id",monitor.getId()));
+            for(WarnHistory history:warnHis){
+                history.setMonitorName(monitor.getMonitorName());
+            }
+            warnHistoryMapper.updateById(warnHis);
+
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>().fail(e);
+        }
+
+
+    }
 
 
     @PostMapping("/delete")
