@@ -106,6 +106,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         try{
             checkPermission(resourceId);
+            if(resourceMapper.selectById(resourceId).getResourceManageOn()==1)return new UniversalResponse<>(500,"请先关闭资源管理");
             resourceMapper.deleteById(resourceId);
             relationGroupResourceMapper.delete(new QueryWrapper<RelationGroupResource>().eq("resource_id",resourceId));
             //TODO:JAVA API实现注册和自动重启
@@ -122,11 +123,13 @@ public class ResourceServiceImpl implements ResourceService {
         }
         try{
             QueryWrapper<Resource> wrapper=new QueryWrapper<>();
-            wrapper.eq("resource_type","server")
-                    .like("resource_ip",str)
-                    .like("resource_port",str)
-                    .like("resource_name",str)
-                    .like("resource_description",str);
+            String finalStr = str;
+            wrapper.eq("resource_type", "server")
+                    .and(wrapper1 -> wrapper1
+                            .like("resource_ip", finalStr)
+                            .or().like("resource_port", finalStr)
+                            .or().like("resource_name", finalStr)
+                            .or().like("resource_description", finalStr));
             List<Resource> resourceList= resourceMapper.selectList(wrapper);
 
             //TODO:查询时加入权限筛选？
@@ -178,6 +181,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         try{
             checkPermission(resourceId);
+            if(resourceMapper.selectById(resourceId).getResourceManageOn()==1)return new UniversalResponse<>(500,"请先关闭资源管理");
             resourceMapper.deleteById(resourceId);
             relationGroupResourceMapper.delete(new QueryWrapper<RelationGroupResource>().eq("resource_id",resourceId));
             //TODO:JAVA API实现解绑
@@ -226,12 +230,14 @@ public class ResourceServiceImpl implements ResourceService {
         }
         try{
             QueryWrapper<Resource> wrapper=new QueryWrapper<>();
-            wrapper.eq("resource_type","software")
-                    .like("resource_ip",str)
-                    .like("resource_port",str)
-                    .like("resource_name",str)
-                    .like("resource_type_second",str)
-                    .like("resource_description",str);
+            String finalStr = str;
+            wrapper.eq("resource_type", "software")
+                    .and(iWrapper -> iWrapper
+                            .like("resource_ip", finalStr)
+                            .or().like("resource_port", finalStr)
+                            .or().like("resource_name", finalStr)
+                            .or().like("resource_type_second", finalStr)
+                            .or().like("resource_description", finalStr));
             List<Resource> resourceList= resourceMapper.selectList(wrapper);
             //TODO:查询时加入权限筛选？
 //            List<Resource> filteredResources = resourceList.stream()
@@ -274,6 +280,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource=resourceMapper.selectById(id);
         if(resource==null) return new UniversalResponse<>(500,"找不到资源");
+        if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
         SoftwareDetailRes softwareDetailRes=new  SoftwareDetailRes();
         softwareDetailRes.setResouceId(id);
         softwareDetailRes.setResouceName(resource.getResourceName());
@@ -303,6 +310,7 @@ public class ResourceServiceImpl implements ResourceService {
     public UniversalResponse<?> selectServerDetail(Integer id) {
         Resource resource=resourceMapper.selectById(id);
         if(resource==null) return new UniversalResponse<>(500,"找不到资源");
+        if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
         HardwareDetailRes hardwareDetailRes=new HardwareDetailRes();
         hardwareDetailRes.setResouceId(id);
         hardwareDetailRes.setResouceName(resource.getResourceName());
@@ -341,6 +349,7 @@ public class ResourceServiceImpl implements ResourceService {
         try{
 
             Resource resource=resourceMapper.selectById(id);
+            if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
@@ -361,6 +370,7 @@ public class ResourceServiceImpl implements ResourceService {
     public UniversalResponse<?> restartDocker(Integer id) {
         try{
             Resource resource=resourceMapper.selectById(id);
+            if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
@@ -380,6 +390,7 @@ public class ResourceServiceImpl implements ResourceService {
     public UniversalResponse<?> startDocker(Integer id) {
         try{
             Resource resource=resourceMapper.selectById(id);
+            if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
             String containerId=resource.getReservedParam();
             if(containerId==null||containerId.isEmpty()){
                 containerId=getContainerId(id);
@@ -397,6 +408,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public UniversalResponse<?> dockerDetails(Integer id) {
         Resource resource= resourceMapper.selectById(id);
+        if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
         if(!Objects.equals(resource.getStartMode(), "docker"))return new UniversalResponse<>(500,"不是docker资源");
         DockerManager dockerManager=new DockerManager(resource.getResourceIp());
         ContainerDetailRes containerDetailRes= dockerManager.showContainerInfo(resource.getReservedParam());

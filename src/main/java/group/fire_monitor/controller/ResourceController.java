@@ -74,7 +74,12 @@ public class ResourceController {
     @ResponseBody
     @ApiOperation("删除服务器资源")
     public UniversalResponse<?> deleteServer(@RequestParam Integer id) {
-
+        List<Monitor> monitorList= monitorMapper.selectList(null);
+        for(Monitor monitor:monitorList){
+            if(CommonUtil.stringToList(monitor.getMonitorResourceIds()).contains(id)){
+                return new UniversalResponse<>(500,"服务器资源仍在被监控，请先调整监控");
+            }
+        }
         return resourceService.deleteServer(id);
     }
     /*
@@ -155,6 +160,21 @@ public class ResourceController {
         return resourceService.selectServerDetail(id);
     }
 
+
+    /*
+     * 修改资源
+     * */
+    @PostMapping("/edit")
+    @ResponseBody
+    @ApiOperation("修改资源")
+    public UniversalResponse<?> editResource(@RequestBody Resource resource) {
+        try{
+            resourceMapper.updateById(resource);
+            return new UniversalResponse<>().success();
+        }catch (Exception e){
+            return new UniversalResponse<>().fail(e);
+        }
+    }
     /*
      * 停止docker程序
      * */

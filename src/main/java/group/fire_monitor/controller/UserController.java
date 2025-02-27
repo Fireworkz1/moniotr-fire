@@ -241,4 +241,18 @@ public class UserController {
             return new UniversalResponse<>(500,e.getMessage());
         }
     }
+
+    @PostMapping("/deleteGroup")
+    @ApiOperation("删除分组")
+    @ResponseBody
+    @Transactional
+    public UniversalResponse<?> delete(@RequestParam Integer id){
+        try {
+            groupMapper.deleteById(id);
+            groupUserMapper.delete(new QueryWrapper<RelationGroupUser>().eq("group_id",id));
+            return new UniversalResponse<>().success();
+        } catch (Exception e) {
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+    }
 }
