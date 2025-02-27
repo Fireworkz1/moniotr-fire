@@ -106,8 +106,8 @@ public class MonitorServiceImpl implements MonitorService {
 
     @Override
     public List<Monitor> selectLike(String str, String type) {
-        if(!Objects.equals(type, "server") && !Objects.equals(type, "software"))
-            throw new RuntimeException("类型应为server或software");
+//        if(!Objects.equals(type, "server") && !Objects.equals(type, "software"))
+//            throw new RuntimeException("类型应为server或software");
         QueryWrapper<Monitor> wrapper=new QueryWrapper<>();
         if(str!=null&&! str.isEmpty()){
             wrapper.like("monitor_name",str)
