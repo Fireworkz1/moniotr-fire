@@ -52,9 +52,13 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnPolicy> selectLike(String str) {
         QueryWrapper<WarnPolicy> wrapper=new QueryWrapper<>();
-        wrapper.like("warn_name",str)
-                .like("warn_description",str)
-                .orderByDesc("monitor_on").orderByDesc("is_active")
+        if(str!=null&& !str.isEmpty()){
+            wrapper.like("warn_name",str)
+                    .or()
+                    .like("warn_description",str);
+        }
+
+                wrapper.orderByDesc("monitor_on").orderByDesc("is_active")
                 ;
         List<WarnPolicy> policies=warnPolicyMapper.selectList(wrapper)
                 .stream().filter(policy-> {

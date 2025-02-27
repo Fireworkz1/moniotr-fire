@@ -229,6 +229,7 @@ public class ResourceServiceImpl implements ResourceService {
             str="%";
         }
         try{
+
             QueryWrapper<Resource> wrapper=new QueryWrapper<>();
             String finalStr = str;
             wrapper.eq("resource_type", "software")
@@ -282,9 +283,9 @@ public class ResourceServiceImpl implements ResourceService {
         if(resource==null) return new UniversalResponse<>(500,"找不到资源");
         if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
         SoftwareDetailRes softwareDetailRes=new  SoftwareDetailRes();
-        softwareDetailRes.setResouceId(id);
-        softwareDetailRes.setResouceName(resource.getResourceName());
-        softwareDetailRes.setResouceIp(resource.getResourceIp());
+        softwareDetailRes.setResourceId(id);
+        softwareDetailRes.setResourceName(resource.getResourceName());
+        softwareDetailRes.setResourceIp(resource.getResourceIp());
         softwareDetailRes.setResourceType(resource.getResourceType());
         softwareDetailRes.setResourcePort(resource.getResourcePort());
         softwareDetailRes.setStartMode(resource.getStartMode());
@@ -312,9 +313,9 @@ public class ResourceServiceImpl implements ResourceService {
         if(resource==null) return new UniversalResponse<>(500,"找不到资源");
         if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
         HardwareDetailRes hardwareDetailRes=new HardwareDetailRes();
-        hardwareDetailRes.setResouceId(id);
-        hardwareDetailRes.setResouceName(resource.getResourceName());
-        hardwareDetailRes.setResouceIp(resource.getResourceIp());
+        hardwareDetailRes.setResourceId(id);
+        hardwareDetailRes.setResourceName(resource.getResourceName());
+        hardwareDetailRes.setResourceIp(resource.getResourceIp());
         hardwareDetailRes.setResourceType("server");
         hardwareDetailRes.setResourceDescription(resource.getResourceDescription());
         hardwareDetailRes.setExporterType("node_exporter");

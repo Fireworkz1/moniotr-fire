@@ -47,7 +47,7 @@ public class Warner {
     @Scheduled(fixedRate = 120000)
     public void checkWarning() {
         try{
-            System.out.println("当前系统时间：" + new java.util.Date());
+            System.out.println("当前系统时间：" + new java.util.Date()+"，正在告警侦测中...");
             warning();
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +71,7 @@ public class Warner {
                     //处理告警逻辑
                     if(CommonUtil.needToWarn(policy.getCompareType(),value, policy.getWarnThreshold())){
                         flag="active";
+                        System.out.println("当前规则正在告警，warnId="+policy.getId()+"，policyName="+policy.getWarnName());
                         //如果需要告警
                         switch(policy.getWarnLevel()){
                             case 0:

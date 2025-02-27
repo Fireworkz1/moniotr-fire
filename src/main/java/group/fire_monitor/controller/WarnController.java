@@ -127,7 +127,8 @@ public class WarnController {
     @ApiOperation("查看历史")
     public UniversalResponse<?> getHistory(@RequestParam(required = false) String str) {
 
-        List<WarnHistory> histories=warnHistoryMapper.selectList(new QueryWrapper<WarnHistory>().like("warn_name",str)
+        List<WarnHistory> histories=warnHistoryMapper.selectList(new QueryWrapper<WarnHistory>()
+                .like("warn_name",str)
                 .like("warn_description",str)
                 .orderByDesc("last_warning_time"));
 

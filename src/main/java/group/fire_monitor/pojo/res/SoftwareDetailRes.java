@@ -7,9 +7,9 @@ public class SoftwareDetailRes {
     Integer prometheusUp;
     String prometheusJobname;
     String prometheusInstance;
-    Integer resouceId;
-    String resouceName;
-    String resouceIp;
+    Integer resourceId;
+    String resourceName;
+    String resourceIp;
     String resourceType;
     String exporterType;
     String resourceDescription;

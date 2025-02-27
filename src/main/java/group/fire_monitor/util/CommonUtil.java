@@ -26,6 +26,7 @@ public class CommonUtil {
         return buffer.toString();
     }
     public static List<?> stringToList(String string){
+        if(string==null) return new ArrayList<>();
         List<Object> list = new ArrayList<>();
 
         // 按逗号分隔字符串
@@ -58,14 +59,11 @@ public class CommonUtil {
     public static boolean needToWarn(String compareType,Double value,Double threshold){
         switch(compareType){
             case ">=":
-                if(value>=threshold)
-                    return true;
+                return value >= threshold;
             case "<=":
-                if(value<=threshold)
-                    return true;
+                return value <= threshold;
             case "=":
-                if(Objects.equals(value, threshold))
-                    return true;
+                return Objects.equals(value, threshold);
             default:
                 throw new RuntimeException("目前只支持>=,<=,=三种判断条件");
 

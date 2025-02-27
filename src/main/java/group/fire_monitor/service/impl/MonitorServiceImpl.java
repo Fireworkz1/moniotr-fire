@@ -109,9 +109,14 @@ public class MonitorServiceImpl implements MonitorService {
         if(!Objects.equals(type, "server") && !Objects.equals(type, "software"))
             throw new RuntimeException("类型应为server或software");
         QueryWrapper<Monitor> wrapper=new QueryWrapper<>();
-        wrapper.like("monitor_name",str)
-                .like("monitor_description",str)
-                .eq("monitor_type",type);
+        if(str!=null&&! str.isEmpty()){
+            wrapper.like("monitor_name",str)
+                    .like("monitor_description",str);
+        }
+        if(!type.isEmpty()){
+            wrapper.eq("monitor_type",type);
+        }
+
         return monitorMapper.selectList(wrapper);
     }
 

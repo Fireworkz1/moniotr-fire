@@ -116,7 +116,7 @@ public class MonitorController {
     @PostMapping("/selectLike")
     @ResponseBody
     @ApiOperation("模糊查询监控实例")
-    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str,@RequestParam String type) {
+    public UniversalResponse<?> selectByName(@RequestParam(required = false) String str,@RequestParam(required = false) String type) {
         List<Monitor> monitorList= monitorService.selectLike(str,type);
 
         return new UniversalResponse<>().success(monitorList);
