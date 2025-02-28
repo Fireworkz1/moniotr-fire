@@ -39,7 +39,21 @@ public class PrometheusResponse {
         return (String) result.getValue().get(1);
     }
     public Timestamp getSingleTimestamp()  {
-        PrometheusResult result= getSingleResult();
-        return (Timestamp) result.getValue().get(0);
+        PrometheusResult result = getSingleResult();
+        if (result == null || result.getValue() == null || result.getValue().size() < 1) {
+            throw new IllegalArgumentException("Invalid result or value list");
+        }
+
+        Object timestampObj = result.getValue().get(0);
+        if (!(timestampObj instanceof Double)) {
+            throw new IllegalArgumentException("Timestamp value is not a Double");
+        }
+
+        // 将 Double 类型的时间戳转换为 long 类型
+        Double timestampDouble = (Double) timestampObj;
+        long timestampLong = timestampDouble.longValue();
+
+        // 创建 Timestamp 对象
+        return new Timestamp(timestampLong);
     }
 }

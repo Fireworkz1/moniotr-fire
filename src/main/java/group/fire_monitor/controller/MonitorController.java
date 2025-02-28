@@ -86,6 +86,13 @@ public class MonitorController {
             return new UniversalResponse<>().success();
     }
 
+    @PostMapping("/selectById")
+    @ResponseBody
+    @ApiOperation("查询监控实例")
+    public UniversalResponse<?> selectId(@RequestParam Integer monitorId) {
+        return new UniversalResponse<>().success(monitorMapper.selectById(monitorId));
+    }
+
     @PostMapping("/selectTableById")
     @ResponseBody
     @ApiOperation("查询某实例单次详细数据")

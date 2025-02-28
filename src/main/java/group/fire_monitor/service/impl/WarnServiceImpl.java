@@ -30,6 +30,7 @@ public class WarnServiceImpl implements WarnService {
         WarnPolicy warnPolicy=new WarnPolicy();
         warnPolicy.setWarnLevel(form.getWarnLevel());
         warnPolicy.setWarnSource(form.getWarnSource());
+        warnPolicy.setWarnSourceType(form.getWarnSourceType());
         warnPolicy.setWarnDescription(form.getWarnDescription());
         warnPolicy.setWarnName(form.getWarnName());
         warnPolicy.setWarnThreshold(form.getWarnThreshold());
@@ -40,6 +41,7 @@ public class WarnServiceImpl implements WarnService {
 //        warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
         warnPolicy.setLastWarningTime(null);
         warnPolicy.setStartWarningTime(null);
+        warnPolicy.setWarnRepeatTimes(0);
         warnPolicy.setMonitorOn(0);
         warnPolicy.setIsActive(0);
         warnPolicy.setHasSentNotice(0);
@@ -51,20 +53,14 @@ public class WarnServiceImpl implements WarnService {
 
     @Override
     public List<WarnPolicy> selectLike(String str) {
-        QueryWrapper<WarnPolicy> wrapper=new QueryWrapper<>();
-        if(str!=null&& !str.isEmpty()){
-            wrapper.like("warn_name",str)
-                    .or()
-                    .like("warn_description",str);
-        }
 
-                wrapper.orderByDesc("monitor_on").orderByDesc("is_active")
+
+        List<WarnPolicy> policies=warnPolicyMapper.selectPoliciesWithMonitorInstance(str)
+//                .stream().filter(policy-> {
+//                    return CommonUtil.stringToList(policy.getNoticeUserIds()).contains(JWTUtil.getCurrentUser().getId());
+//                })
+//                .collect(Collectors.toList())
                 ;
-        List<WarnPolicy> policies=warnPolicyMapper.selectList(wrapper)
-                .stream().filter(policy-> {
-                    return CommonUtil.stringToList(policy.getNoticeUserIds()).contains(JWTUtil.getCurrentUser().getId());
-                })
-                .collect(Collectors.toList());
         return policies;
 
     }

@@ -113,7 +113,7 @@ public class MonitorServiceImpl implements MonitorService {
             wrapper.like("monitor_name",str)
                     .like("monitor_description",str);
         }
-        if(!type.isEmpty()){
+        if(type!=null&&!type.isEmpty()){
             wrapper.eq("monitor_type",type);
         }
 

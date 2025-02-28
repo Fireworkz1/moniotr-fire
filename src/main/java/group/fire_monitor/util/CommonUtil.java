@@ -59,10 +59,11 @@ public class CommonUtil {
     public static boolean needToWarn(String compareType,Double value,Double threshold){
         switch(compareType){
             case ">=":
+                System.out.println(">=?");
                 return value >= threshold;
             case "<=":
                 return value <= threshold;
-            case "=":
+            case "==":
                 return Objects.equals(value, threshold);
             default:
                 throw new RuntimeException("目前只支持>=,<=,=三种判断条件");
