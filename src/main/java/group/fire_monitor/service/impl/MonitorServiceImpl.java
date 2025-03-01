@@ -39,6 +39,7 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public UniversalResponse<?> create(AddMonitorForm form) {
         try{
+            if(form.getMonitorResourceIds().isEmpty())throw new RuntimeException("请至少选择一个资源");
             Monitor monitor=new Monitor();
             monitor.setMonitorDescription(form.getMonitorDescription());
             monitor.setMonitorName(form.getMonitorName());
@@ -110,7 +111,9 @@ public class MonitorServiceImpl implements MonitorService {
 //            throw new RuntimeException("类型应为server或software");
         QueryWrapper<Monitor> wrapper=new QueryWrapper<>();
         if(str!=null&&! str.isEmpty()){
-            wrapper.like("monitor_name",str)
+            wrapper.like("monitor_name",str).or()
+                    .like("monitor_preset_target",str).or()
+                    .like("monitor_notpreset_promql",str).or()
                     .like("monitor_description",str);
         }
         if(type!=null&&!type.isEmpty()){
@@ -122,6 +125,7 @@ public class MonitorServiceImpl implements MonitorService {
 
     @Override
     public void update(ChangeMonitorForm form) {
+        if(form.getNewResourceIdList().isEmpty())throw new RuntimeException("请至少选择一个资源");
         Monitor monitor= monitorMapper.selectById(form.getMonitorId());
         monitor.setMonitorResourceIds(CommonUtil.listToString(form.getNewResourceIdList()));
         monitorMapper.updateById(monitor);
@@ -220,7 +224,7 @@ public class MonitorServiceImpl implements MonitorService {
     }
     private List<PrometheusResult> resultFilter(Monitor monitor,List<PrometheusResult> rawResults){
         //TODO：使用redis优化函数运行速度
-        List<Integer> resourceIdList= (List<Integer>) CommonUtil.stringToList(monitor.getMonitorResourceIds());
+        List<Integer> resourceIdList= CommonUtil.stringToList(monitor.getMonitorResourceIds());
         List<Resource> resourceList= resourceMapper.selectBatchIds(resourceIdList);
         List<String> instanceList=new ArrayList<>();
         for(Resource resource:resourceList){

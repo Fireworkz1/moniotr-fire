@@ -5,19 +5,23 @@ import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.mapper.WarnHistoryMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
 import group.fire_monitor.pojo.Monitor;
+import group.fire_monitor.pojo.MonitorWithListPojo;
 import group.fire_monitor.pojo.WarnHistory;
 import group.fire_monitor.pojo.WarnPolicy;
 import group.fire_monitor.pojo.form.AddMonitorForm;
 import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.pojo.form.GraphDataForm;
 import group.fire_monitor.service.MonitorService;
+import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -55,8 +59,12 @@ public class MonitorController {
     @Transactional
     @ResponseBody
     @ApiOperation("修改实例")
-    public UniversalResponse<?> update(@RequestBody Monitor monitor) {
+    public UniversalResponse<?> update(@RequestBody MonitorWithListPojo monitorWithListPojo) {
+
         try{
+            Monitor monitor=new Monitor();
+            BeanUtils.copyProperties(monitorWithListPojo,monitor);
+            monitor.setMonitorResourceIds(CommonUtil.listToString(monitorWithListPojo.getMonitorResourceIds()));
             monitorMapper.updateById(monitor);
             List<WarnPolicy> warnPolicys= warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("monitor_id",monitor.getId()));
             for(WarnPolicy warnPolicy:warnPolicys){
@@ -80,17 +88,28 @@ public class MonitorController {
 
     @PostMapping("/delete")
     @ResponseBody
+    @Transactional
     @ApiOperation("删除监控实例")
     public UniversalResponse<?> delete(@RequestParam Integer monitorId) {
+        try{
             monitorMapper.deleteById(monitorId);
+            warnPolicyMapper.delete(new QueryWrapper<WarnPolicy>().eq("monitor_id",monitorId));
             return new UniversalResponse<>().success();
+        }catch (Exception e){
+            return new UniversalResponse<>().fail(e);
+        }
+
     }
 
     @PostMapping("/selectById")
     @ResponseBody
     @ApiOperation("查询监控实例")
     public UniversalResponse<?> selectId(@RequestParam Integer monitorId) {
-        return new UniversalResponse<>().success(monitorMapper.selectById(monitorId));
+        MonitorWithListPojo pojo=new MonitorWithListPojo();
+        Monitor monitor=monitorMapper.selectById(monitorId);
+        BeanUtils.copyProperties(monitor,pojo);
+        pojo.setMonitorResourceIds(CommonUtil.stringToList(monitor.getMonitorResourceIds()));
+        return new UniversalResponse<>().success(pojo);
     }
 
     @PostMapping("/selectTableById")
@@ -125,7 +144,13 @@ public class MonitorController {
     @ApiOperation("模糊查询监控实例")
     public UniversalResponse<?> selectByName(@RequestParam(required = false) String str,@RequestParam(required = false) String type) {
         List<Monitor> monitorList= monitorService.selectLike(str,type);
-
-        return new UniversalResponse<>().success(monitorList);
+        List<MonitorWithListPojo> monitorWithListPojos=new ArrayList<>();
+        for(Monitor monitor:monitorList){
+            MonitorWithListPojo pojo=new MonitorWithListPojo();
+            BeanUtils.copyProperties(monitor,pojo);
+            pojo.setMonitorResourceIds(CommonUtil.stringToList(monitor.getMonitorResourceIds()));
+            monitorWithListPojos.add(pojo);
+        }
+        return new UniversalResponse<>().success(monitorWithListPojos);
     }
 }

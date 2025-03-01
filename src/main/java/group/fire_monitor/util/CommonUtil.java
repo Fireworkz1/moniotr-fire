@@ -1,7 +1,5 @@
 package group.fire_monitor.util;
 
-import org.springframework.boot.autoconfigure.jms.JmsProperties;
-
 import java.util.*;
 
 public class CommonUtil {
@@ -25,9 +23,9 @@ public class CommonUtil {
         }
         return buffer.toString();
     }
-    public static List<?> stringToList(String string){
+    public static List<Integer> stringToList(String string){
         if(string==null) return new ArrayList<>();
-        List<Object> list = new ArrayList<>();
+        List<Integer> list = new ArrayList<>();
 
         // 按逗号分隔字符串
         String[] parts = string.split(",");
