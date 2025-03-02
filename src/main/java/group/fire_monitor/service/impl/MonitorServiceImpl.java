@@ -45,7 +45,7 @@ public class MonitorServiceImpl implements MonitorService {
             monitor.setMonitorName(form.getMonitorName());
             monitor.setMonitorNotpresetPromql(form.getMonitorNotpresetPromql());
             if(!Objects.equals(form.getMonitorDemonstration(), "table") && !Objects.equals(form.getMonitorDemonstration(), "graph")){
-                throw new RuntimeException("demonstration应为table或gtaph");
+                throw new RuntimeException("demonstration应为table或graph");
             }
             monitor.setMonitorDemonstration(form.getMonitorDemonstration());
             monitor.setMonitorPresetTarget(form.getMonitorPresetTarget());
@@ -152,6 +152,9 @@ public class MonitorServiceImpl implements MonitorService {
         try {
             String query;
             switch (target){
+                /*
+                 * 服务器指标
+                 * */
                 case "server_file_free_gb":
                     query= prometheusQueryExecutor.server_file_free_gb();
                     break;

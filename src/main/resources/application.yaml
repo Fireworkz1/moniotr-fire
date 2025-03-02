@@ -1,7 +1,9 @@
 server:
   port: 9500
 
-
+mybatis-plus:
+  configuration:
+    default-statement-timeout: 10  # 单位为秒
 spring:
   datasource:
     druid:

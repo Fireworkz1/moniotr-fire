@@ -160,7 +160,16 @@ public class ResourceController {
         return resourceService.selectServerDetail(id);
     }
 
-
+    @PostMapping("/selectBatch")
+    @ResponseBody
+    @ApiOperation("查询资源Byids")
+    public UniversalResponse<?> selectResourceBatch(@RequestBody List<Integer> ids) {
+        List<Resource> resources= resourceMapper.selectBatchIds(ids);
+        if(resources!=null){
+            return new UniversalResponse<>().success(resources) ;
+        }
+        return new UniversalResponse<>(500,"找不到资源");
+    }
     /*
      * 修改资源
      * */

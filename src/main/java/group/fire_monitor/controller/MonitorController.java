@@ -13,6 +13,7 @@ import group.fire_monitor.pojo.form.ChangeMonitorForm;
 import group.fire_monitor.pojo.form.GraphDataForm;
 import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.util.CommonUtil;
+import group.fire_monitor.util.dic.MetricDictionary;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -152,5 +153,12 @@ public class MonitorController {
             monitorWithListPojos.add(pojo);
         }
         return new UniversalResponse<>().success(monitorWithListPojos);
+    }
+
+    @GetMapping("/metricList")
+    @ResponseBody
+    @ApiOperation("获取指标")
+    public UniversalResponse<?> metric(){
+        return new UniversalResponse<>().success(MetricDictionary.getMetricList());
     }
 }
