@@ -12,7 +12,6 @@ import java.util.Date;
 public class Monitor {
     @TableId(type = IdType.AUTO)
     private Integer id;
-//    private Integer resourceId;
     private String monitorName;
     private String monitorDescription;
     private String monitorNotpresetPromql;

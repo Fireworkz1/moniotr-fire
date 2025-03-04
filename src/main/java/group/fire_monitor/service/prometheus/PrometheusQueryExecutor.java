@@ -15,12 +15,13 @@ public class PrometheusQueryExecutor {
         // 将 Date 转换为 Unix 时间戳（秒）
         long startTimestamp = start.getTime() / 1000; // 转换为秒
         long endTimestamp = end.getTime() / 1000;     // 转换为秒
-
+        int desiredDataPoints=60;
+        int step = (int) ((endTimestamp - startTimestamp) / (desiredDataPoints - 1));
         // 构造查询 URL
-        String url = prometheusUrl + "/api/v1/query_range?query={query}&start={start}&end={end}&step=60s";
+        String url = prometheusUrl + "/api/v1/query_range?query={query}&start={start}&end={end}&step={step}s";
 
         // 发起 HTTP 请求
-        String response = restTemplate.getForObject(url, String.class, query, startTimestamp, endTimestamp);
+        String response = restTemplate.getForObject(url, String.class, query, startTimestamp, endTimestamp,step);
 
         // 解析响应
         return PrometheusResponseParser.parse(response);

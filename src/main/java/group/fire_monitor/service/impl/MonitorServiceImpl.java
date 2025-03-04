@@ -75,7 +75,11 @@ public class MonitorServiceImpl implements MonitorService {
             monitor.setMonitorResourceIds(CommonUtil.listToString(form.getMonitorResourceIds()));
 
 
-
+        try {
+            getSingleMonitorData(monitor);
+            }catch (Exception e){
+            return new UniversalResponse<>(500,"无法获取prometheus数据，请检查表格信息");
+        }
             monitorMapper.insert(monitor);
             return new UniversalResponse<>().success();
         } catch (RuntimeException e) {
@@ -212,7 +216,7 @@ public class MonitorServiceImpl implements MonitorService {
                         if(start==null){
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTime(end);
-                            calendar.add(Calendar.MINUTE, -30); // 减去 60 分钟
+                            calendar.add(Calendar.MINUTE, -30); // 减去 30 分钟
                             start = calendar.getTime();
 
                         }
@@ -231,7 +235,8 @@ public class MonitorServiceImpl implements MonitorService {
         List<Resource> resourceList= resourceMapper.selectBatchIds(resourceIdList);
         List<String> instanceList=new ArrayList<>();
         for(Resource resource:resourceList){
-            String instance=resource.getResourceIp()+":"+resource.getResourcePort();
+            String instance=resource.getResourceIp()+":";
+            if(resource.getResourcePort()!=null&&!resource.getResourcePort().isEmpty())instance+=resource.getResourcePort();
             if(Objects.equals(resource.getResourceType(), "server")){
                 instance=instance+"9100";
             }

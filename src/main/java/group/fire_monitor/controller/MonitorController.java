@@ -110,6 +110,7 @@ public class MonitorController {
         Monitor monitor=monitorMapper.selectById(monitorId);
         BeanUtils.copyProperties(monitor,pojo);
         pojo.setMonitorResourceIds(CommonUtil.stringToList(monitor.getMonitorResourceIds()));
+        pojo.setMonitorGroupIds(CommonUtil.stringToList(monitor.getMonitorGroupIds()));
         return new UniversalResponse<>().success(pojo);
     }
 
@@ -123,7 +124,6 @@ public class MonitorController {
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }
-
     }
 
 
@@ -150,6 +150,7 @@ public class MonitorController {
             MonitorWithListPojo pojo=new MonitorWithListPojo();
             BeanUtils.copyProperties(monitor,pojo);
             pojo.setMonitorResourceIds(CommonUtil.stringToList(monitor.getMonitorResourceIds()));
+            pojo.setMonitorGroupIds(CommonUtil.stringToList(monitor.getMonitorGroupIds()));
             monitorWithListPojos.add(pojo);
         }
         return new UniversalResponse<>().success(monitorWithListPojos);
@@ -160,5 +161,12 @@ public class MonitorController {
     @ApiOperation("获取指标")
     public UniversalResponse<?> metric(){
         return new UniversalResponse<>().success(MetricDictionary.getMetricList());
+    }
+
+    @PostMapping("/metricDescription")
+    @ResponseBody
+    @ApiOperation("根据字段获取指标描述")
+    public UniversalResponse<?> metricDescription(@RequestParam String target){
+        return new UniversalResponse<>().success(MetricDictionary.getDescriptionByTarget(target));
     }
 }

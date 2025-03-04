@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 public class MonitorWithListPojo {
     private Integer id;
-    //    private Integer resourceId;
     private String monitorName;
     private String monitorDescription;
     private String monitorNotpresetPromql;

@@ -136,6 +136,16 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
+
+            for(Resource resource:resourceList){
+                UniversalResponse response= testPing(resource);
+                if(response.getCode()==200){
+                    resource.setResourceUp(1);
+                }else{
+                    resource.setResourceUp(0);
+                }
+            }
+            resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
@@ -244,6 +254,15 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
+            for(Resource resource:resourceList){
+                UniversalResponse response= testSoftware(resource);
+                if(response.getCode()==200){
+                    resource.setResourceUp(1);
+                }else{
+                    resource.setResourceUp(0);
+                }
+            }
+            resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
