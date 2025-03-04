@@ -18,8 +18,8 @@ public class MetricDictionary {
         metricList.add(new MetricType("server", "server_cpu_context_switches_5m", "服务器5分钟CPU上下文切换次数"));
         metricList.add(new MetricType("server", "server_disk_input_rate_5m", "服务器5分钟磁盘输入速率"));
         metricList.add(new MetricType("server", "server_disk_output_rate_5m", "服务器5分钟磁盘输出速率"));
-        metricList.add(new MetricType("server", "server_processes_running", "服务器运行中的进程数"));
-        metricList.add(new MetricType("server", "server_threads_running", "服务器运行中的线程数"));
+        metricList.add(new MetricType("server", "node_forks_total", "服务器系统中创建进程的总数"));
+//        metricList.add(new MetricType("server", "server_threads_running", "服务器运行中的线程数"));
 
 // 软件指标
         metricList.add(new MetricType("software", "software_jvm_nonheap_memory_usage", "JVM非堆内存使用情况"));

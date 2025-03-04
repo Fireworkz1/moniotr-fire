@@ -180,12 +180,10 @@ public class MonitorServiceImpl implements MonitorService {
                 case "server_disk_output_rate_5m":
                     query= prometheusQueryExecutor.server_disk_output_rate_5m();
                     break;
-                case "server_processes_running":
-                    query= prometheusQueryExecutor.server_processes_running();
+                case "node_forks_total":
+                    query= prometheusQueryExecutor.node_forks_total();
                     break;
-                case "server_threads_running":
-                    query= prometheusQueryExecutor.server_threads_running();
-                    break;
+
 
                 /*
                  * 软件指标

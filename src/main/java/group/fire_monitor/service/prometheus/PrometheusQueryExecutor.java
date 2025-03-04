@@ -212,17 +212,13 @@ public class PrometheusQueryExecutor {
     /*
      * 进程数量
      * */
-    public String server_processes_running() {
-        String query = "node_processes_running";
+    public String node_forks_total() {
+        String query = "node_forks_total";
         return query;
     }
     /*
      * 线程数量
      * */
-    public String server_threads_running() {
-        String query = "node_threads_running";
-        return query;
-    }
 
 
 
