@@ -136,7 +136,7 @@ public class UserController {
         if (groupMapper.selectById(changeGroupMemberForm.getGroupId())==null)
             return new UniversalResponse<>(500,"不存在分组");
         Group group=groupMapper.selectById(changeGroupMemberForm.getGroupId());
-        if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))&&
+        if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))||
             group.getGroupLeaderId()!=currentUser.getId()){
             return new UniversalResponse<>(500,"您不是当前分组负责人，没有权限修改分组");
         }
@@ -210,6 +210,9 @@ public class UserController {
     public  UniversalResponse<?> group(){
         try{
             List<Integer> groupIds=groupUserMapper.selectList(new QueryWrapper<RelationGroupUser>().eq("user_id",JWTUtil.getCurrentUser().getId())).stream().map(RelationGroupUser::getGroupId).collect(Collectors.toList());
+            if(groupIds.isEmpty()){
+                return new UniversalResponse<>().success(null) ;
+            }
             List<Group> groups=groupMapper.selectBatchIds(groupIds);
             return new UniversalResponse<>().success(groups) ;
         }catch (Exception e){
