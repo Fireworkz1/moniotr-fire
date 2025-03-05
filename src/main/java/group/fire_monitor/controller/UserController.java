@@ -136,7 +136,7 @@ public class UserController {
         if (groupMapper.selectById(changeGroupMemberForm.getGroupId())==null)
             return new UniversalResponse<>(500,"不存在分组");
         Group group=groupMapper.selectById(changeGroupMemberForm.getGroupId());
-        if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))&&
+        if(!(Objects.equals(currentUser.getPermissionLevel(), PermissionLevelEnum.ADMIN.getPermissionLevel()))||
                 !Objects.equals(group.getGroupLeaderId(), currentUser.getId())){
             return new UniversalResponse<>(500,"您不是当前分组负责人，没有权限修改分组");
         }
