@@ -19,6 +19,7 @@ public class PrometheusResult {
         private String area;
         private String id;
 
+        private String device;
         private String domainname;
         private String machine;
         private String nodename;

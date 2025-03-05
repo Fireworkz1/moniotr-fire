@@ -136,15 +136,15 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
-
-            for(Resource resource:resourceList){
-                UniversalResponse response= testPing(resource);
-                if(response.getCode()==200){
-                    resource.setResourceUp(1);
-                }else{
-                    resource.setResourceUp(0);
-                }
-            }
+//TODO:在查询资源时判断是否在线？现在太卡，可以定时完成刷新任务
+//            for(Resource resource:resourceList){
+//                UniversalResponse response= testPing(resource);
+//                if(response.getCode()==200){
+//                    resource.setResourceUp(1);
+//                }else{
+//                    resource.setResourceUp(0);
+//                }
+//            }
             resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
