@@ -8,7 +8,7 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://8.130.20.137:3306/fire-monitor?SetTimezone=CTS
+      url: jdbc:mysql://8.130.20.137:3306/fire-monitor-aftermid?SetTimezone=CTS
       username: user1
       password: fireworkz0518A6400_
   mvc:
