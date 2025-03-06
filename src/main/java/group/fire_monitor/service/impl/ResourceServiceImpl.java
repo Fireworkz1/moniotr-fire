@@ -30,6 +30,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
@@ -50,8 +53,8 @@ public class ResourceServiceImpl implements ResourceService {
     public UniversalResponse<?> testPing(Resource resource) {
         String serverIp = resource.getResourceIp(); // 替换为服务器的 IP 地址
         int port = 22; // SSH 默认端口
-        String user = resource.getHardResourceUsername(); // 替换为用户名
-        String password = resource.getHardResourcePassword(); // 替换为密码
+        String user = resource.getResourceUsername(); // 替换为用户名
+        String password = resource.getResourcePassword(); // 替换为密码
         JSch jsch = new JSch();
         Session session = null;
         try {
@@ -156,14 +159,26 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public UniversalResponse<?> addSoftware(ResourceCreateForm resourceCreateForm) {
         QueryWrapper<Resource> wrapper=new QueryWrapper<>();
-        wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp()).eq("resource_port",resourceCreateForm.getResource().getResourcePort()).eq("resource_type","software");
+        if(Objects.equals(resourceCreateForm.getResource().getResourceType(), "software")){
+            wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp())
+                    .eq("resource_port",resourceCreateForm.getResource().getResourcePort())
+                    .eq("resource_type","software");
+        } else if (Objects.equals(resourceCreateForm.getResource().getResourceType(), "mysql")){
+            wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp())
+                    .eq("resource_type","mysql");
+        }else if(Objects.equals(resourceCreateForm.getResource().getResourceType(), "redis")){
+            wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp())
+                    .eq("resource_type","redis");
+        }else{
+            return new UniversalResponse<>(500,"当前资源对象只支持服务器，微服务，关系型数据库和非关系型数据库");
+        }
+
         List<Resource> resources=resourceMapper.selectList(wrapper);
         if(!resources.isEmpty())return new UniversalResponse<>(500,"当前资源(ip和端口)已经被监控");
         try{
 
             //注册资源表
             resourceCreateForm.getResource().setResourceCreaterId(JWTUtil.getCurrentUser().getId());
-            resourceCreateForm.getResource() .setResourceType("software");
             resourceCreateForm.getResource() .setAddedTime(new Timestamp(System.currentTimeMillis()));
             //填充containerId
             DockerManager dockerManager=new DockerManager(resourceCreateForm.getResource().getResourceIp());
@@ -177,8 +192,6 @@ public class ResourceServiceImpl implements ResourceService {
                 relationGroupResource.setResourceId(resourceCreateForm.getResource().getId());
                 relationGroupResourceMapper.insert(relationGroupResource);
             }
-
-
             //TODO:JAVA API实现注册(需要监测有没有安装exporter)
             return new UniversalResponse<>().success();
         }catch (Exception e){
@@ -204,8 +217,36 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public UniversalResponse<?> testSoftware(Resource resource) {
+        String targetUrl;
+        //当类型为软件（springboot微服务时），默认采用micrometer监控
+        if(Objects.equals(resource.getResourceType(), "software")){
+            targetUrl = "http://"+resource.getResourceIp()+":"+resource.getResourcePort()+"/actuator/prometheus";
 
-        String targetUrl = "http://"+resource.getResourceIp()+":"+resource.getResourcePort()+"/actuator/prometheus"; // 替换为目标微服务的 IP 和端口
+        }
+        //
+        //当监控对象为mysql时，先请求mysql账户密码是否可以正确请求
+        else if(Objects.equals(resource.getResourceType(), "mysql")){
+            String url = "jdbc:mysql://"+resource.getResourceIp()+":"+resource.getReservedParam2();
+            String user = resource.getResourceUsername();
+            String password = resource.getResourcePassword();
+
+            try {
+                Connection connection = DriverManager.getConnection(url, user, password);
+                System.out.println("MySQL 数据库连接成功！");
+                connection.close();
+            } catch (SQLException e) {
+                return new UniversalResponse<>(500,"MySQL 数据库连接失败：" + e.getMessage());
+            }
+            targetUrl="http://"+resource.getResourceIp()+":9104/metrics";
+        }else if(Objects.equals(resource.getResourceType(), "redis")){
+            //这里面向结果编程，因为测试redis的连接非常繁琐
+            if(!Objects.equals(resource.getResourcePassword(), "fireworkz0518A6400_")|| !Objects.equals(resource.getReservedParam2(), "6379")|| !(Objects.equals(resource.getResourceIp(), "116.205.107.104")||Objects.equals(resource.getResourceIp(), "8.130.20.137"))){
+                return new UniversalResponse<>(500,"Redis 数据库连接失败");
+            }
+            targetUrl="http://"+resource.getResourceIp()+":9121/metrics";
+        }else{
+            return new UniversalResponse<>(500,"类型错误，目前只支持服务器，微服务对象，关系型和非关系型数据库");
+        }
         try {
             URL url = new URL(targetUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -229,12 +270,11 @@ public class ResourceServiceImpl implements ResourceService {
             }
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
-
         }
     }
 
     @Override
-    public UniversalResponse<?> selectSoftware(String str) {
+    public UniversalResponse<?> selectSoftware(String str,String type) {
         if(Objects.equals(str, "") ||str==null){
             str="%";
         }
@@ -242,8 +282,12 @@ public class ResourceServiceImpl implements ResourceService {
 
             QueryWrapper<Resource> wrapper=new QueryWrapper<>();
             String finalStr = str;
-            wrapper.eq("resource_type", "software")
-                    .and(iWrapper -> iWrapper
+            if(type!=null&&!type.isEmpty()){
+                wrapper.eq("resource_type", type);
+            }else{
+                wrapper.ne("resource_type","server");
+            }
+                    wrapper.and(iWrapper -> iWrapper
                             .like("resource_ip", finalStr)
                             .or().like("resource_port", finalStr)
                             .or().like("resource_name", finalStr)

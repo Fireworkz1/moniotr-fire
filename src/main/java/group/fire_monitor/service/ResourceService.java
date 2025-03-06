@@ -19,7 +19,7 @@ public interface ResourceService {
     UniversalResponse<?> deleteSoftware(Integer resourceId);
 
     UniversalResponse<?> testSoftware(Resource resource);
-    UniversalResponse<?> selectSoftware(String str);
+    UniversalResponse<?> selectSoftware(String str,String type);
 
     UniversalResponse<?> testExporter(Integer type);
 

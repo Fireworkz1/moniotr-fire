@@ -126,8 +126,8 @@ public class ResourceController {
     @PostMapping("/selectSoftware")
     @ResponseBody
     @ApiOperation("查询软件资源")
-    public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str) {
-        return resourceService.selectSoftware(str);
+    public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str,@RequestParam(required = false) String type) {
+        return resourceService.selectSoftware(str,type);
     }
     @PostMapping("/selectSoftwareById")
     @ResponseBody
