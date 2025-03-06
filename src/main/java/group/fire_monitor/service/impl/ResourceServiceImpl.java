@@ -36,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -164,9 +165,11 @@ public class ResourceServiceImpl implements ResourceService {
                     .eq("resource_port",resourceCreateForm.getResource().getResourcePort())
                     .eq("resource_type","software");
         } else if (Objects.equals(resourceCreateForm.getResource().getResourceType(), "mysql")){
+            resourceCreateForm.getResource().setResourcePort("9104");
             wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp())
                     .eq("resource_type","mysql");
         }else if(Objects.equals(resourceCreateForm.getResource().getResourceType(), "redis")){
+            resourceCreateForm.getResource().setResourcePort("9121");
             wrapper.eq("resource_ip",resourceCreateForm.getResource().getResourceIp())
                     .eq("resource_type","redis");
         }else{
@@ -180,10 +183,34 @@ public class ResourceServiceImpl implements ResourceService {
             //注册资源表
             resourceCreateForm.getResource().setResourceCreaterId(JWTUtil.getCurrentUser().getId());
             resourceCreateForm.getResource() .setAddedTime(new Timestamp(System.currentTimeMillis()));
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                Future<?> future = executor.submit(() -> {
+                    // 放置你的同步代码
+                    try {
+                        if (Objects.equals(resourceCreateForm.getResource().getStartMode(), "docker")) {
+                            DockerManager dockerManager = new DockerManager(resourceCreateForm.getResource().getResourceIp());
+                            String containerId = dockerManager.getContainerIdByPort(resourceCreateForm.getResource().getResourcePort());
+                            resourceCreateForm.getResource().setReservedParam(containerId);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error occurred: " + e.getMessage());
+                    }
+                });
+
+                // 等待任务完成，超时时间为1秒
+                future.get(1, TimeUnit.SECONDS);
+                System.out.println("Task completed within timeout.");
+            } catch (TimeoutException e) {
+                System.out.println("Task timed out after 1 second.");
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("Error occurred: " + e.getMessage());
+            } finally {
+                executor.shutdownNow(); // 关闭线程池并取消所有任务
+            }
+
             //填充containerId
-            DockerManager dockerManager=new DockerManager(resourceCreateForm.getResource().getResourceIp());
-            String containerId=dockerManager.getContainerIdByPort(resourceCreateForm.getResource().getResourcePort());
-            resourceCreateForm.getResource().setReservedParam(containerId);
+
             resourceMapper.insert(resourceCreateForm.getResource());
             //注册资源访问权限表
             for(Integer groupId:resourceCreateForm.getGroupIdList()){
@@ -298,14 +325,14 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
-            for(Resource resource:resourceList){
-                UniversalResponse response= testSoftware(resource);
-                if(response.getCode()==200){
-                    resource.setResourceUp(1);
-                }else{
-                    resource.setResourceUp(0);
-                }
-            }
+//            for(Resource resource:resourceList){
+//                UniversalResponse response= testSoftware(resource);
+//                if(response.getCode()==200){
+//                    resource.setResourceUp(1);
+//                }else{
+//                    resource.setResourceUp(0);
+//                }
+//            }
             resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
@@ -353,16 +380,26 @@ public class ResourceServiceImpl implements ResourceService {
         softwareDetailRes.setResourcePort(resource.getResourcePort());
         softwareDetailRes.setStartMode(resource.getStartMode());
         softwareDetailRes.setResourceDescription(resource.getResourceDescription());
-        softwareDetailRes.setExporterType("micrometer");
+        switch (resource.getResourceType()){
+            case "software":
+                softwareDetailRes.setExporterType("micrometer");
+                break;
+            case "mysql":
+                softwareDetailRes.setExporterType("mysqld_exporter");
+                break;
+            case "redis":
+                softwareDetailRes.setExporterType("redis_exporter");
+                break;
+            default:
+                softwareDetailRes.setExporterType("未知采集器");
+        }
+
         try {
             PrometheusResponse response = prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.up_single(resource.getResourceIp(),resource.getResourcePort()));
             if(response.getData().getResult().isEmpty())return new UniversalResponse<>(500,"资源未在prometheus配置");
             softwareDetailRes.setPrometheusInstance(response.getData().getResult().get(0).getMetric().getInstance());
             softwareDetailRes.setPrometheusJobname(response.getData().getResult().get(0).getMetric().getJob());
             softwareDetailRes.setPrometheusUp(Integer.valueOf(response.getSingleValue()));
-            if (softwareDetailRes.getPrometheusUp()==0){
-                return new UniversalResponse<>().success(softwareDetailRes);
-            }
             return new UniversalResponse<>().success(softwareDetailRes);
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());

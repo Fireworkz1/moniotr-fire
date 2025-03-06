@@ -197,10 +197,56 @@ public class MonitorServiceImpl implements MonitorService {
                 case "software_jvm_gc_times_5min":
                     query= prometheusQueryExecutor.software_jvm_gc_times_5min();
                     break;
+
                 case "software_jvm_threads_number":
                     query= prometheusQueryExecutor.software_jvm_threads_number();
                     break;
 
+                case "software_jvm_threads_states_threads":
+                    query= prometheusQueryExecutor.software_jvm_threads_states_threads();
+                    break;
+
+                /*
+                 * mysql指标
+                 * */
+                case "mysql_qps":
+                    query = prometheusQueryExecutor.mysqlQps();
+                    break;
+                case "mysql_slow_queries":
+                    query = prometheusQueryExecutor.mysqlSlowQueries();
+                    break;
+                case "mysql_connections":
+                    query = prometheusQueryExecutor.mysqlConnections();
+                    break;
+                case "mysql_available_connections":
+                    query = prometheusQueryExecutor.mysqlAvailableConnections();
+                    break;
+
+                    /*redis*/
+                case "redis_connected_clients":
+                    query = prometheusQueryExecutor.redisConnectedClients();
+                    break;
+                case "redis_operations_per_second":
+                    query = prometheusQueryExecutor.redisOperationsPerSecond();
+                    break;
+                case "redis_memory_usage":
+                    query = prometheusQueryExecutor.redisMemoryUsage();
+                    break;
+                case "redis_keyspace_hits_and_misses":
+                    query = prometheusQueryExecutor.redisKeyspaceHitsAndMisses();
+                    break;
+                case "redis_memory_fragmentation_ratio":
+                    query = prometheusQueryExecutor.redisMemoryFragmentationRatio();
+                    break;
+                case "redis_network_traffic":
+                    query = prometheusQueryExecutor.redisNetworkTraffic();
+                    break;
+                case "redis_command_latency":
+                    query = prometheusQueryExecutor.redisCommandLatency();
+                    break;
+                case "redis_uptime_in_seconds":
+                    query = prometheusQueryExecutor.redisUptimeInSeconds();
+                    break;
                 default:
                     throw new RuntimeException("请输入正确的监测指标");}
 

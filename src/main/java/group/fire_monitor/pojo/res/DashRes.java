@@ -8,4 +8,8 @@ public class DashRes {
     private Integer serverNum;
     private Integer softwareNum;
     private Integer warnNum;
+    private Integer dbNum;
+    private Integer cacheNum;
+    private Integer hisWarningNum;
+    private Integer totalWarningNum;
 }

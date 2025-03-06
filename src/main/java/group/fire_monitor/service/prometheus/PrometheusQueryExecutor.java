@@ -261,4 +261,77 @@ public class PrometheusQueryExecutor {
         return query;
     }
 
+    /*
+     *JVM线程状态
+     * */
+    public String software_jvm_threads_states_threads() {
+        String query = "jvm_threads_states_threads";
+        return query;
+    }
+
+    /**
+     * MySQL QPS（每秒查询次数）
+     */
+    public String mysqlQps() {
+        String query = "rate(mysql_global_status_questions[1m])";
+        return query;
+    }
+
+    /**
+     * MySQL慢查询次数
+     */
+    public String mysqlSlowQueries() {
+        String query = "rate(mysql_global_status_slow_queries[1m])";
+        return query;
+    }
+
+    /**
+     * MySQL连接数
+     */
+    public String mysqlConnections() {
+        String query = "mysql_global_status_threads_connected";
+        return query;
+    }
+
+    /**
+     * MySQL剩余可用连接数
+     */
+    public String mysqlAvailableConnections() {
+        String query = "mysql_global_variables_max_connections - mysql_global_status_threads_connected";
+        return query;
+    }
+
+/*redis*/
+public String redisConnectedClients() {
+    return "redis_connected_clients";
+}
+
+    public String redisOperationsPerSecond() {
+        return "rate(redis_commands_processed_total[1m])";
+    }
+
+    public String redisMemoryUsage() {
+        return "redis_memory_used_bytes";
+    }
+
+    public String redisKeyspaceHitsAndMisses() {
+        return "redis_keyspace_hits_total + redis_keyspace_misses_total";
+    }
+
+    public String redisMemoryFragmentationRatio() {
+        return "redis_mem_fragmentation_ratio";
+    }
+
+    public String redisNetworkTraffic() {
+        return "rate(redis_net_input_bytes_total[1m]) + rate(redis_net_output_bytes_total[1m])";
+    }
+
+    public String redisCommandLatency() {
+        return "rate(redis_commands_duration_seconds_total[1m]) / rate(redis_commands_total[1m])";
+    }
+
+    public String redisUptimeInSeconds() {
+        return "redis_uptime_in_seconds";
+    }
+
 }

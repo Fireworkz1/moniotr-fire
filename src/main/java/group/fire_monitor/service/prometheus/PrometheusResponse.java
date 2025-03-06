@@ -15,6 +15,8 @@ public class PrometheusResponse {
     private String status;
     private Data data;
 
+    private List<String> warnings;
+
     @lombok.Data
     public static class Data {
         private String resultType;

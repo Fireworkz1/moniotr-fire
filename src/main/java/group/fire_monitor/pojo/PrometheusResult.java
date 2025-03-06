@@ -26,6 +26,7 @@ public class PrometheusResult {
         private String sysname;
         private String release;
         private String version;
+        private String cmd;
     }
 
 //    public Date getDataDateTime(){
