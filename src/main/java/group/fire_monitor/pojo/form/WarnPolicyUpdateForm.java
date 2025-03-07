@@ -5,16 +5,16 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AddWarnForm {
+public class WarnPolicyUpdateForm {
+    private Integer id;
+    private Integer monitorOn;
     private String warnName;
     private Integer warnLevel;
     private String warnSource;
     private String warnSourceType;
     private String compareType;
     private Double warnThreshold;
-//    private Integer warnRepeatTimes;
     private String warnDescription;
-    private Integer monitorId;
-    private String monitorName;
-    List<Integer> noticeGroupIds;
+    private List<Integer> noticeGroupIds;
+    private String noticeWay;
 }

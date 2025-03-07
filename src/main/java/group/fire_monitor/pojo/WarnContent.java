@@ -19,5 +19,5 @@ public class WarnContent {
     private Date warnTime;
     private String warnDescription;
     private String warnSource;
-    private String warnSourcetype;
+    private String warnSourceType;
 }

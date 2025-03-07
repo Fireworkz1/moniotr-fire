@@ -1,10 +1,10 @@
 package group.fire_monitor.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import group.fire_monitor.mapper.ResourceMapper;
-import group.fire_monitor.mapper.UserMapper;
-import group.fire_monitor.mapper.WarnPolicyMapper;
+import group.fire_monitor.mapper.*;
 import group.fire_monitor.pojo.Resource;
+import group.fire_monitor.pojo.WarnEntity;
+import group.fire_monitor.pojo.WarnHistory;
 import group.fire_monitor.pojo.res.DashRes;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @RestController
 @Api(tags = "3:监控实例")
@@ -30,6 +31,10 @@ public class DashboardController {
     private ResourceMapper resourceMapper;
     @Autowired
     private WarnPolicyMapper warnPolicyMapper;
+    @Autowired
+    private WarnHistoryMapper warnHistoryMapper;
+    @Autowired
+    private WarnEntityMapper warnEntityMapper;
 
     @GetMapping("/basicInfo")
     @ApiOperation("dashboard展示信息")
@@ -58,6 +63,12 @@ public class DashboardController {
             Integer dbNum = resourceCounts.getOrDefault("mysql", 0);
             Integer cacheNum = resourceCounts.getOrDefault("redis", 0);
             Integer warnNum=warnPolicyMapper.selectList(null).size();
+
+
+            Integer hisWarningNum= Math.toIntExact(warnHistoryMapper.selectCount(null));
+            Integer totalWarningNum=warnHistoryMapper.selectList(null).stream().mapToInt(WarnHistory::getWarnRepeatTimes).sum();
+            totalWarningNum+=warnEntityMapper.selectList(null).stream().mapToInt(WarnEntity::getWarnRepeatTimes).sum();
+            totalWarningNum=totalWarningNum*4;
             DashRes res=new DashRes();
             res.setServerNum(serverNum);
             res.setSoftwareNum(softwareNum);
@@ -65,6 +76,8 @@ public class DashboardController {
             res.setUserNum(userNum);
             res.setDbNum(dbNum);
             res.setCacheNum(cacheNum);
+            res.setHisWarningNum(hisWarningNum);
+            res.setTotalWarningNum(totalWarningNum);
             return new UniversalResponse<>().success(res);
         } catch (Exception e) {
             return new UniversalResponse<>().fail(e);

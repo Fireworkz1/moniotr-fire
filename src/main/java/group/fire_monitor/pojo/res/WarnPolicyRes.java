@@ -1,16 +1,12 @@
-package group.fire_monitor.pojo;
+package group.fire_monitor.pojo.res;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.util.Date;
-
+import java.util.List;
 @Data
-@TableName("warn_policy")
-public class WarnPolicy {
-
+public class WarnPolicyRes {
     private Integer monitorOn;
     private String warnName;
     private Integer warnLevel;
@@ -21,12 +17,11 @@ public class WarnPolicy {
     private String warnDescription;
     private Integer monitorId;
     private String monitorName;
-    private String noticeGroupIds;
+    private List<Integer> noticeGroupIds;
     private String noticeWay;
 
     //Warn非公用字段
     @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer isActive;
-
 }

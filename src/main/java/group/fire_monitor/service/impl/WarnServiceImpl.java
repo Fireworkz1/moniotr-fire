@@ -2,21 +2,18 @@ package group.fire_monitor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
+import group.fire_monitor.mapper.WarnEntityMapper;
 import group.fire_monitor.mapper.WarnPolicyMapper;
-import group.fire_monitor.pojo.Monitor;
+import group.fire_monitor.pojo.WarnEntity;
 import group.fire_monitor.pojo.WarnPolicy;
 import group.fire_monitor.pojo.form.AddWarnForm;
 import group.fire_monitor.service.WarnService;
 import group.fire_monitor.util.CommonUtil;
-import group.fire_monitor.util.JWTUtil;
-import group.fire_monitor.util.enums.WarnNoticeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class WarnServiceImpl implements WarnService {
@@ -24,6 +21,8 @@ public class WarnServiceImpl implements WarnService {
     WarnPolicyMapper warnPolicyMapper;
     @Autowired
     MonitorMapper monitorMapper;
+    @Autowired
+    WarnEntityMapper warnEntityMapper;
     @Override
     @Transactional
     public void create(AddWarnForm form) {
@@ -37,14 +36,10 @@ public class WarnServiceImpl implements WarnService {
         warnPolicy.setCompareType(form.getCompareType());
         warnPolicy.setMonitorId(form.getMonitorId());
         warnPolicy.setMonitorName(form.getMonitorName());
-        warnPolicy.setNoticeUserIds(CommonUtil.listToString(form.getNoticeUserIds()));
+        warnPolicy.setNoticeGroupIds(CommonUtil.listToString(form.getNoticeGroupIds()));
 //        warnPolicy.setCurrentStatus(WarnNoticeEnum.SAFE.getLevel());
-        warnPolicy.setLastWarningTime(null);
-        warnPolicy.setStartWarningTime(null);
-        warnPolicy.setWarnRepeatTimes(0);
         warnPolicy.setMonitorOn(0);
         warnPolicy.setIsActive(0);
-        warnPolicy.setHasSentNotice(0);
         warnPolicyMapper.insert(warnPolicy);
         //TODO:根据告警等级添加powerjob任务
 
@@ -57,7 +52,7 @@ public class WarnServiceImpl implements WarnService {
 
         List<WarnPolicy> policies=warnPolicyMapper.selectPoliciesWithMonitorInstance(str)
 //                .stream().filter(policy-> {
-//                    return CommonUtil.stringToList(policy.getNoticeUserIds()).contains(JWTUtil.getCurrentUser().getId());
+//                    return CommonUtil.stringToList(policy.getNoticeGroupIds()).contains(JWTUtil.getCurrentUser().getId());
 //                })
 //                .collect(Collectors.toList())
                 ;
@@ -68,7 +63,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     @Transactional
     public void delete(Integer id) {
-
+        warnEntityMapper.delete(new QueryWrapper<WarnEntity>().eq("warn_policy_id",id));
         warnPolicyMapper.deleteById(id);
     }
 

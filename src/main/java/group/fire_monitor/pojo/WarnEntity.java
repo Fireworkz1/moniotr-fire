@@ -8,8 +8,9 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("warn_entity_history")
-public class WarnHistory {
+@TableName("warn_entity")
+public class WarnEntity {
+
     private Integer monitorOn;
     private String warnName;
     private Integer warnLevel;
@@ -23,14 +24,15 @@ public class WarnHistory {
     private String noticeGroupIds;
     private String noticeWay;
 
-    //warn非公用字段
+    //Warn非公用字段
     @TableId(type = IdType.AUTO)
     private Integer id;
-    private Integer warnEntityId;
+    private Integer warnPolicyId;
     private Integer warnRepeatTimes;
     private String currentStatus;
     private Date startWarningTime;
     private Date lastWarningTime;
     private Integer hasSentNotice;
-
+    private Integer hasIgnored;
+    private String currentWarningTarget;
 }

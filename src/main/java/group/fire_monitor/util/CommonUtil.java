@@ -57,7 +57,6 @@ public class CommonUtil {
     public static boolean needToWarn(String compareType,Double value,Double threshold){
         switch(compareType){
             case ">=":
-                System.out.println(">=?");
                 return value >= threshold;
             case "<=":
                 return value <= threshold;
