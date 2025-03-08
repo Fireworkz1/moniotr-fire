@@ -46,15 +46,7 @@ public class Warner {
 
 
 
-    @Scheduled(fixedRate = 120000)
-    public void checkWarning() {
-        try {
-            System.out.println("当前系统时间：" + new java.util.Date() + "，正在告警侦测中...");
-            warning();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
 
     public void warning() {
         List<WarnPolicy> warnTargetList = warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("monitor_on", 1));

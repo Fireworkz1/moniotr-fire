@@ -295,6 +295,7 @@ public class ResourceServiceImpl implements ResourceService {
                 System.out.println("Failed to access Prometheus metrics endpoint. HTTP response code: " + responseCode);
                 return new UniversalResponse<>(500,"未能连接到软件资源，请检查是否已安装exporter");
             }
+
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
         }
@@ -514,6 +515,31 @@ public class ResourceServiceImpl implements ResourceService {
         DockerManager dockerManager=new DockerManager(resource.getResourceIp());
         ContainerDetailRes containerDetailRes= dockerManager.showContainerInfo(resource.getReservedParam());
         return new UniversalResponse<>().success(containerDetailRes);
+    }
+
+    @Override
+    public void checkResourceActivity() {
+        List<Resource> resourceList=resourceMapper.selectList(null);
+        for(Resource resource:resourceList){
+            if(Objects.equals(resource.getResourceType(), "server")) {
+                try {
+                    testPing(resource);
+                    resource.setResourceUp(1);
+                } catch (Exception e) {
+                    System.out.println("资源无法连接:"+resource.getResourceName());
+                    resource.setResourceUp(0);
+                }
+            }else{
+                try {
+                    testSoftware(resource);
+                    resource.setResourceUp(1);
+                }catch (Exception e){
+                    System.out.println("资源无法连接:"+resource.getResourceName());
+                    resource.setResourceUp(0);
+                }
+            }
+        }
+        resourceMapper.updateById(resourceList);
     }
 
     private String getContainerId(Integer id) {

@@ -1,5 +1,6 @@
 package group.fire_monitor.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.MonitorMapper;
 import group.fire_monitor.mapper.ResourceMapper;
 import group.fire_monitor.pojo.Monitor;
@@ -183,6 +184,22 @@ public class ResourceController {
         }catch (Exception e){
             return new UniversalResponse<>().fail(e);
         }
+    }
+
+
+
+
+    @PostMapping("/software/docker/selectItems")
+    @ResponseBody
+    @ApiOperation("获取docker资源列表")
+    public UniversalResponse<?> selectDocker() {
+        try {
+            List<Resource> resources=resourceMapper.selectList(new QueryWrapper<Resource>().eq("start_mode","docker"));
+            return new UniversalResponse<>().success(resources);
+        }catch (Exception e){
+            return new UniversalResponse<>(500,e.getMessage());
+        }
+
     }
     /*
      * 停止docker程序

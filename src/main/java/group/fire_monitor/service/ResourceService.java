@@ -38,4 +38,7 @@ public interface ResourceService {
     UniversalResponse<?> startDocker(Integer id);
 
     UniversalResponse<?> dockerDetails(Integer id);
+
+
+    void checkResourceActivity();
 }
