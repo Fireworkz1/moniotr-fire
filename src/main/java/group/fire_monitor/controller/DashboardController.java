@@ -68,7 +68,7 @@ public class DashboardController {
             Integer hisWarningNum= Math.toIntExact(warnHistoryMapper.selectCount(null));
             Integer totalWarningNum=warnHistoryMapper.selectList(null).stream().mapToInt(WarnHistory::getWarnRepeatTimes).sum();
             totalWarningNum+=warnEntityMapper.selectList(null).stream().mapToInt(WarnEntity::getWarnRepeatTimes).sum();
-            totalWarningNum=totalWarningNum*4;
+            totalWarningNum=totalWarningNum*12;
             DashRes res=new DashRes();
             res.setServerNum(serverNum);
             res.setSoftwareNum(softwareNum);

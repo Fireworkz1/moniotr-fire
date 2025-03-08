@@ -138,7 +138,34 @@ public class WarnController {
 
     }
 
+    @PostMapping("/warnconfirm")
+    @ResponseBody
+    @ApiOperation("确认告警")
+    public UniversalResponse<?> confirm(@RequestParam String type,@RequestParam Integer entityId){
+        WarnEntity warnEntity=warnEntityMapper.selectById(entityId);
+        WarnHistory warnHistory=new WarnHistory();
 
+        switch (type){
+            case "confirm":
+                BeanUtils.copyProperties(warnEntity,warnHistory);
+                warnHistory.setId(null);
+                warnHistory.setWarnEntityId(warnEntity.getId());
+                warnHistory.setCurrentStatus("已确认");
+                warnEntityMapper.deleteById(warnEntity);
+                warnHistoryMapper.insert(warnHistory);
+                return new UniversalResponse<>().success();
+            case "dismiss":
+                BeanUtils.copyProperties(warnEntity,warnHistory);
+                warnHistory.setId(null);
+                warnHistory.setWarnEntityId(warnEntity.getId());
+                warnHistory.setCurrentStatus("已忽略");
+                warnEntity.setHasIgnored(1);
+                warnHistoryMapper.insert(warnHistory);
+                return new UniversalResponse<>().success();
+            default:
+                return new UniversalResponse<>(500,"请输入正确的类型");
+        }
+    }
     @PostMapping("/warnentity")
     @ResponseBody
     @ApiOperation("查看历史")
