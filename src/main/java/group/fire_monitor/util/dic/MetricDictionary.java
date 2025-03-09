@@ -9,7 +9,10 @@ import java.util.Objects;
 public class MetricDictionary {
     public static List<MetricType> getMetricList() {
         List<MetricType> metricList = new ArrayList<>();
-
+        metricList.add(new MetricType("server", "up", "资源是否在线（1为是，0为否）"));
+        metricList.add(new MetricType("software", "up", "资源是否在线（1为是，0为否）"));
+        metricList.add(new MetricType("mysql", "up", "资源是否在线（1为是，0为否）"));
+        metricList.add(new MetricType("redis", "up", "资源是否在线（1为是，0为否）"));
 // 服务器指标
         metricList.add(new MetricType("server", "server_file_free_gb", "服务器磁盘剩余空间（GB）"));
         metricList.add(new MetricType("server", "server_load_1min", "服务器1分钟负载"));

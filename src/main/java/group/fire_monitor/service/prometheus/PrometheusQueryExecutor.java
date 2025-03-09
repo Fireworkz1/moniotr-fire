@@ -55,7 +55,7 @@ public class PrometheusQueryExecutor {
     /*
      * 全部采集器
      * */
-    public String up() throws Exception {
+    public String up() {
         String query = "up";
         return query;
     }

@@ -156,6 +156,9 @@ public class MonitorServiceImpl implements MonitorService {
         try {
             String query;
             switch (target){
+                case "up":
+                    query=prometheusQueryExecutor.up();
+                    break;
                 /*
                  * 服务器指标
                  * */
