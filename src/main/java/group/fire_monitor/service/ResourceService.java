@@ -31,7 +31,7 @@ public interface ResourceService {
 
     UniversalResponse<?> selectServerDetail(Integer id);
 
-    UniversalResponse<?> stopContainer(Integer id);
+    UniversalResponse<?> stopDocker(Integer id);
 
     UniversalResponse<?> restartDocker(Integer id);
 
@@ -41,4 +41,6 @@ public interface ResourceService {
 
 
     void checkResourceActivity();
+
+    UniversalResponse<?> dockerLog(Integer id,Integer lines);
 }

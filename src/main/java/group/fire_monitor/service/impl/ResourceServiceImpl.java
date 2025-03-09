@@ -326,14 +326,25 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
-//            for(Resource resource:resourceList){
-//                UniversalResponse response= testSoftware(resource);
-//                if(response.getCode()==200){
-//                    resource.setResourceUp(1);
-//                }else{
-//                    resource.setResourceUp(0);
-//                }
-//            }
+            CompletableFuture[] futures = resourceList.stream()
+                    .map(resource -> CompletableFuture.runAsync(() -> {
+                        UniversalResponse response = testSoftware(resource);
+                        if (response.getCode() == 200) {
+                            resource.setResourceUp(1);
+                        } else {
+                            resource.setResourceUp(0);
+                        }
+                    }))
+                    .toArray(CompletableFuture[]::new);
+
+            // 等待所有任务完成
+            try {
+                CompletableFuture.allOf(futures).get(); // 等待所有任务完成
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt(); // 重新设置中断状态
+            }
+
+            // 所有任务完成后，统一更新数据库
             resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
@@ -447,7 +458,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public UniversalResponse<?> stopContainer(Integer id) {
+    public UniversalResponse<?> stopDocker(Integer id) {
         try{
 
             Resource resource=resourceMapper.selectById(id);
@@ -460,7 +471,7 @@ public class ResourceServiceImpl implements ResourceService {
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.stopContainer(containerId);
-
+            CompletableFuture.runAsync(this::checkResourceActivity);
             return new UniversalResponse<>().success();
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
@@ -481,6 +492,7 @@ public class ResourceServiceImpl implements ResourceService {
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.restartContainer(containerId);
+            CompletableFuture.runAsync(this::checkResourceActivity);
             return new UniversalResponse<>().success();
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
@@ -501,6 +513,7 @@ public class ResourceServiceImpl implements ResourceService {
             }
             DockerManager dockerManager=new DockerManager(resource.getResourceIp());
             dockerManager.startContainer(containerId);
+            CompletableFuture.runAsync(this::checkResourceActivity);
             return new UniversalResponse<>().success();
         } catch (Exception e) {
             return new UniversalResponse<>(500,e.getMessage());
@@ -519,27 +532,43 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public void checkResourceActivity() {
-        List<Resource> resourceList=resourceMapper.selectList(null);
-        for(Resource resource:resourceList){
-            if(Objects.equals(resource.getResourceType(), "server")) {
-                try {
+        List<Resource> resourceList = resourceMapper.selectList(null);
+        CompletableFuture[] futures = resourceList.stream().map(resource -> CompletableFuture.runAsync(() -> {
+            try {
+                if (Objects.equals(resource.getResourceType(), "server")) {
                     testPing(resource);
                     resource.setResourceUp(1);
-                } catch (Exception e) {
-                    System.out.println("资源无法连接:"+resource.getResourceName());
-                    resource.setResourceUp(0);
-                }
-            }else{
-                try {
+                } else {
                     testSoftware(resource);
                     resource.setResourceUp(1);
-                }catch (Exception e){
-                    System.out.println("资源无法连接:"+resource.getResourceName());
-                    resource.setResourceUp(0);
                 }
+            } catch (Exception e) {
+                System.out.println("资源无法连接:" + resource.getResourceName());
+                resource.setResourceUp(0);
             }
-        }
+        })).toArray(CompletableFuture[]::new);
+
+        // 等待所有任务完成
+        CompletableFuture.allOf(futures).join();
+
+        // 更新数据库
         resourceMapper.updateById(resourceList);
+    }
+
+    @Override
+    public UniversalResponse<?> dockerLog(Integer id,Integer lines) {
+        Resource resource= resourceMapper.selectById(id);
+        if(resource.getResourceManageOn()==0)return new UniversalResponse<>(500,"请先启动资源管理");
+        if(!Objects.equals(resource.getStartMode(), "docker"))return new UniversalResponse<>(500,"不是docker资源");
+        DockerManager dockerManager=new DockerManager(resource.getResourceIp());
+        try{
+            List<String> log=dockerManager.getDockerLog(resource.getReservedParam(),lines);
+            return new UniversalResponse<>().success(log);
+        }catch (Exception e){
+            return new UniversalResponse<>().fail(e);
+        }
+
+
     }
 
     private String getContainerId(Integer id) {

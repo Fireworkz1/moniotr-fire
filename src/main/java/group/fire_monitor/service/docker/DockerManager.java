@@ -2,15 +2,20 @@ package group.fire_monitor.service.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.command.ListContainersCmd;
+import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import group.fire_monitor.pojo.res.ContainerDetailRes;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 
 public class DockerManager {
@@ -45,12 +50,17 @@ public class DockerManager {
         try {
             // 替换为实际的容器 ID
             InspectContainerResponse containerDetails = dockerClient.inspectContainerCmd(containerId).exec();
-
+            containerDetailRes.setDriver(containerDetails.getDriver());
+            containerDetailRes.setCreatedAt(containerDetails.getCreated());
             containerDetailRes.setContainerId(containerDetails.getId());
             containerDetailRes.setName(containerDetails.getName());
             containerDetailRes.setPlatform(containerDetails.getPlatform());
             containerDetailRes.setStatus(containerDetails.getState().getStatus());
             containerDetailRes.setStartedAt(containerDetails.getState().getStartedAt());
+            containerDetailRes.setImage(containerDetails.getConfig().getImage());
+            containerDetailRes.setPorts(String.valueOf(containerDetails.getNetworkSettings().getPorts()));
+
+            containerDetailRes.setIPAdress(String.valueOf(containerDetails.getNetworkSettings().getNetworks().get("bridge")));
         } finally {
 
         }
@@ -87,5 +97,48 @@ public class DockerManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getDockerLog(String containerId,Integer lines) throws InterruptedException {
+        if(lines==null)
+            lines=50;
+        LogContainerCmd logContainerCmd = dockerClient.logContainerCmd(containerId)
+                .withStdOut(true) // 获取标准输出
+                .withStdErr(true) // 获取标准错误
+                .withTail(lines); // 实时跟随日志流
+        List<String> logLines= Collections.synchronizedList(new ArrayList<>());
+        StringBuilder logBuilder = new StringBuilder();
+        // 注册回调处理日志
+        try {
+            logContainerCmd.exec(new LogContainerResultCallback() {
+                @Override
+                public void onNext(Frame frame) {
+                    String logContent = new String(frame.getPayload(), StandardCharsets.UTF_8);
+                    logBuilder.append(logContent);
+                }
+
+                @Override
+                public void onComplete() {
+                    String[] lines = logBuilder.toString().split("\\R");
+                    for (String line : lines) {
+                        logLines.add(line.trim());
+                    }
+                    System.out.println("日志获取完成");
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    System.err.println("日志获取失败: " + throwable.getMessage());
+                }
+            }).awaitCompletion(3, TimeUnit.SECONDS); // 设置超时时间
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 重新设置中断状态
+            System.err.println("日志处理被中断: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("日志处理失败: " + e.getMessage());
+        }
+
+        System.out.println("111111111"); // 确保这行代码始终执行
+        return logLines;
     }
 }

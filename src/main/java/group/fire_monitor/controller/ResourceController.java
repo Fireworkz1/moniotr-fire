@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @Api(tags = "2:资源管理")
@@ -194,8 +196,28 @@ public class ResourceController {
     @ApiOperation("获取docker资源列表")
     public UniversalResponse<?> selectDocker() {
         try {
-            List<Resource> resources=resourceMapper.selectList(new QueryWrapper<Resource>().eq("start_mode","docker"));
-            return new UniversalResponse<>().success(resources);
+            List<Resource> resourceList=resourceMapper.selectList(new QueryWrapper<Resource>().eq("start_mode","docker"));
+            CompletableFuture[] futures = resourceList.stream()
+                    .map(resource -> CompletableFuture.runAsync(() -> {
+                        UniversalResponse response = resourceService.testSoftware(resource);
+                        if (response.getCode() == 200) {
+                            resource.setResourceUp(1);
+                        } else {
+                            resource.setResourceUp(0);
+                        }
+                    }))
+                    .toArray(CompletableFuture[]::new);
+
+            // 等待所有任务完成
+            try {
+                CompletableFuture.allOf(futures).get(); // 等待所有任务完成
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt(); // 重新设置中断状态
+            }
+
+            // 所有任务完成后，统一更新数据库
+            resourceMapper.updateById(resourceList);
+            return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
         }
@@ -209,7 +231,7 @@ public class ResourceController {
     @ApiOperation("根据资源id停止docker容器")
     public UniversalResponse<?> stopContainer(@RequestParam Integer id) {
         try {
-            return resourceService.stopContainer(id);
+            return resourceService.stopDocker(id);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
         }
@@ -241,6 +263,13 @@ public class ResourceController {
     @ApiOperation("根据资源id查询docker容器信息")
     public UniversalResponse<?> containerDetails(@RequestParam Integer id) {
         return resourceService.dockerDetails(id);
+    }
+
+    @PostMapping("/software/docker/log")
+    @ResponseBody
+    @ApiOperation("根据资源id查询docker容器log")
+    public UniversalResponse<?> containerLog(@RequestParam Integer id,@RequestParam(required = false) Integer lines) {
+        return resourceService.dockerLog(id,lines);
     }
 
 
