@@ -129,8 +129,13 @@ public class ResourceController {
     @PostMapping("/selectSoftware")
     @ResponseBody
     @ApiOperation("查询软件资源")
-    public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str,@RequestParam(required = false) String type) {
-        return resourceService.selectSoftware(str,type);
+    public UniversalResponse<?> selectSoftware(@RequestParam(required = false) String str,@RequestParam(required = false) String type,@RequestParam(required = false)Integer isdocker) {
+        if(isdocker!=null&&isdocker==1){
+            return resourceService.selectSoftware(str,type,true);
+        }else{
+            return resourceService.selectSoftware(str,type,false);
+        }
+
     }
     @PostMapping("/selectSoftwareById")
     @ResponseBody
@@ -271,6 +276,7 @@ public class ResourceController {
     public UniversalResponse<?> containerLog(@RequestParam Integer id,@RequestParam(required = false) Integer lines) {
         return resourceService.dockerLog(id,lines);
     }
+
 
 
 }

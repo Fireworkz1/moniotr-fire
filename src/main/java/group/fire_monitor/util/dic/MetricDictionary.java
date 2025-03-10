@@ -45,6 +45,7 @@ public class MetricDictionary {
 //        metricList.add(new MetricType("redis", "redis_network_traffic", "Redis每秒网络流量（接收+发送）"));
         metricList.add(new MetricType("redis", "redis_command_latency", "Redis命令平均延迟"));
         metricList.add(new MetricType("redis", "redis_uptime_in_seconds", "Redis实例运行时间（秒）"));
+
         return metricList;
     }
     public static String getDescriptionByTarget(String target){

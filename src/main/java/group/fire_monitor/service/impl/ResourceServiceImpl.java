@@ -4,13 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import group.fire_monitor.mapper.AutoMapper;
 import group.fire_monitor.mapper.RelationGroupResourceMapper;
 import group.fire_monitor.mapper.RelationGroupUserMapper;
 import group.fire_monitor.mapper.ResourceMapper;
-import group.fire_monitor.pojo.PrometheusResult;
-import group.fire_monitor.pojo.RelationGroupResource;
-import group.fire_monitor.pojo.RelationGroupUser;
-import group.fire_monitor.pojo.Resource;
+import group.fire_monitor.pojo.*;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.pojo.res.ContainerDetailRes;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
@@ -34,6 +32,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -49,6 +48,8 @@ public class ResourceServiceImpl implements ResourceService {
     RelationGroupUserMapper relationGroupUserMapper;
     @Autowired
     PrometheusQueryExecutor prometheusQueryExecutor;
+    @Autowired
+    AutoMapper autoMapper;
 
     @Override
     public UniversalResponse<?> testPing(Resource resource) {
@@ -302,7 +303,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public UniversalResponse<?> selectSoftware(String str,String type) {
+    public UniversalResponse<?> selectSoftware(String str,String type,Boolean isdocker) {
         if(Objects.equals(str, "") ||str==null){
             str="%";
         }
@@ -326,26 +327,28 @@ public class ResourceServiceImpl implements ResourceService {
 //            List<Resource> filteredResources = resourceList.stream()
 //                    .filter(resource -> checkPermission(resourceList.stream().map(Resource::getId).collect(Collectors.toList())).contains(resource.getId())) // 筛选条件
 //                    .collect(Collectors.toList());
-            CompletableFuture[] futures = resourceList.stream()
-                    .map(resource -> CompletableFuture.runAsync(() -> {
-                        UniversalResponse response = testSoftware(resource);
-                        if (response.getCode() == 200) {
-                            resource.setResourceUp(1);
-                        } else {
-                            resource.setResourceUp(0);
-                        }
-                    }))
-                    .toArray(CompletableFuture[]::new);
+            if(isdocker){
+                CompletableFuture[] futures = resourceList.stream()
+                        .map(resource -> CompletableFuture.runAsync(() -> {
+                            UniversalResponse response = testSoftware(resource);
+                            if (response.getCode() == 200) {
+                                resource.setResourceUp(1);
+                            } else {
+                                resource.setResourceUp(0);
+                            }
+                        }))
+                        .toArray(CompletableFuture[]::new);
 
-            // 等待所有任务完成
-            try {
-                CompletableFuture.allOf(futures).get(); // 等待所有任务完成
-            } catch (InterruptedException | ExecutionException e) {
-                Thread.currentThread().interrupt(); // 重新设置中断状态
+                // 等待所有任务完成
+                try {
+                    CompletableFuture.allOf(futures).get(); // 等待所有任务完成
+                } catch (InterruptedException | ExecutionException e) {
+                    Thread.currentThread().interrupt(); // 重新设置中断状态
+                }
+
+                // 所有任务完成后，统一更新数据库
+                resourceMapper.updateById(resourceList);
             }
-
-            // 所有任务完成后，统一更新数据库
-            resourceMapper.updateById(resourceList);
             return new UniversalResponse<>().success(resourceList);
         }catch (Exception e){
             return new UniversalResponse<>(500,e.getMessage());
@@ -569,6 +572,46 @@ public class ResourceServiceImpl implements ResourceService {
         }
 
 
+    }
+
+    @Override
+    public void automizationCreate(Auto auto) {
+        auto.setModifiedTime(new Date());
+        auto.setTriggerTimes(0);
+        auto.setMonitorOn(0);
+        autoMapper.insert(auto);
+    }
+
+    @Override
+    public void automizationDelete(Integer autoId) {
+        autoMapper.deleteById(autoId);
+    }
+
+    @Override
+    public void automizationModify(Auto auto) {
+        auto.setModifiedTime(new Date());
+        autoMapper.updateById(auto);
+    }
+
+    @Override
+    public List<Auto> automizationSelect(String str) {
+        if(str!=null&&!str.isEmpty()){
+            return autoMapper.selectList(new QueryWrapper<Auto>().like("auto_name",str));
+        }
+        return autoMapper.selectList(null);
+    }
+
+    @Override
+    public void automizationChangeStatus(Integer autoId) {
+        Auto auto  =autoMapper.selectById(autoId);
+        if(auto==null)throw new RuntimeException("无法查询到自动化策略");
+        if(auto.getMonitorOn()==1){
+            auto.setMonitorOn(0);
+        }
+        else if(auto.getMonitorOn()==0){
+            auto.setMonitorOn(1);
+        }
+        autoMapper.updateById(auto);
     }
 
     private String getContainerId(Integer id) {

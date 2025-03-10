@@ -1,5 +1,6 @@
 package group.fire_monitor.service;
 
+import group.fire_monitor.pojo.Auto;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.util.response.UniversalResponse;
@@ -19,7 +20,7 @@ public interface ResourceService {
     UniversalResponse<?> deleteSoftware(Integer resourceId);
 
     UniversalResponse<?> testSoftware(Resource resource);
-    UniversalResponse<?> selectSoftware(String str,String type);
+    UniversalResponse<?> selectSoftware(String str,String type,Boolean isdocker);
 
     UniversalResponse<?> testExporter(Integer type);
 
@@ -43,4 +44,14 @@ public interface ResourceService {
     void checkResourceActivity();
 
     UniversalResponse<?> dockerLog(Integer id,Integer lines);
+
+    void automizationCreate(Auto auto);
+
+    void automizationDelete(Integer autoId);
+
+    void automizationModify(Auto auto);
+
+    List<Auto> automizationSelect(String str);
+
+    void automizationChangeStatus(Integer autoId);
 }
