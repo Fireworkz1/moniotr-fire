@@ -21,4 +21,6 @@ public class Auto {
     private String monitorPresetTarget;
     private Date modifiedTime;
     private Integer triggerTimes;
+    private String targetIds;
+    private String type;
 }

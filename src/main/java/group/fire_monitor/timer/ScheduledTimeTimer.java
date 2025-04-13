@@ -1,4 +1,4 @@
-package group.fire_monitor.config.timer;
+package group.fire_monitor.timer;
 
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.service.Warner.Warner;
@@ -27,6 +27,15 @@ public class ScheduledTimeTimer {
         try {
             System.out.println("当前系统时间：" + new java.util.Date() +"，正在监测资源在线情况...");
             resourceService.checkResourceActivity();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Scheduled(fixedRate = 300000)
+    public void checkAuto(){
+        try {
+           //TODO:完成定时自动化监控逻辑
         }catch (Exception e){
             e.printStackTrace();
         }

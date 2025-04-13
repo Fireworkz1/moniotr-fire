@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import group.fire_monitor.mapper.AutoMapper;
-import group.fire_monitor.mapper.RelationGroupResourceMapper;
-import group.fire_monitor.mapper.RelationGroupUserMapper;
-import group.fire_monitor.mapper.ResourceMapper;
+import group.fire_monitor.mapper.*;
 import group.fire_monitor.pojo.*;
+import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.pojo.res.ContainerDetailRes;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
@@ -17,11 +15,13 @@ import group.fire_monitor.service.docker.DockerManager;
 import group.fire_monitor.service.prometheus.PrometheusQueryExecutor;
 import group.fire_monitor.service.prometheus.PrometheusResponse;
 import group.fire_monitor.service.ResourceService;
+import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.JWTUtil;
 import group.fire_monitor.util.enums.PermissionLevelEnum;
 import group.fire_monitor.util.response.UniversalResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.BufferedReader;
@@ -50,6 +50,8 @@ public class ResourceServiceImpl implements ResourceService {
     PrometheusQueryExecutor prometheusQueryExecutor;
     @Autowired
     AutoMapper autoMapper;
+    @Autowired
+    AutoGroupMapper autoGroupMapper;
 
     @Override
     public UniversalResponse<?> testPing(Resource resource) {
@@ -583,6 +585,20 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    public void automizationCreateGroup(AutoGroupForm groupForm) {
+        AutoGroup group=new AutoGroup();
+        group.setAutoGroupName(groupForm.getAutoGroupName());
+        group.setDescription(groupForm.getDescription());
+        group.setResourceIds(CommonUtil.listToString(groupForm.getResourceIds()));
+        autoGroupMapper.insert(group);
+    }
+    @Override
+    @Transactional
+    public void automizationDeleteGroup(Integer autoGroupId) {
+        autoMapper.deleteByIds(CommonUtil.stringToList(autoGroupMapper.selectById(autoGroupId).getAutoPolicyIds()));
+        autoGroupMapper.deleteById(autoGroupId);
+    }
+    @Override
     public void automizationDelete(Integer autoId) {
         autoMapper.deleteById(autoId);
     }
@@ -596,7 +612,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<Auto> automizationSelect(String str) {
         if(str!=null&&!str.isEmpty()){
-            return autoMapper.selectList(new QueryWrapper<Auto>().like("auto_name",str));
+            return autoMapper.selectList(new QueryWrapper<Auto>().eq("type","self").like("auto_name",str));
         }
         return autoMapper.selectList(null);
     }

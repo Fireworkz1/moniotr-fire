@@ -1,6 +1,7 @@
 package group.fire_monitor.controller;
 
 import group.fire_monitor.pojo.Auto;
+import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.util.response.UniversalResponse;
 import io.swagger.annotations.Api;
@@ -25,12 +26,36 @@ public class AutoController {
             return new UniversalResponse<>().fail(e);
         }
     }
+
+    @PostMapping("/createGroup")
+    @ResponseBody
+    @ApiOperation("创建规则组策略")
+    public UniversalResponse<?> autocreategroup(@RequestBody AutoGroupForm autoGroupForm) {
+        try{
+            resourceService.automizationCreateGroup(autoGroupForm);
+            return new UniversalResponse<>().success();
+        }catch (Exception e){
+            return new UniversalResponse<>().fail(e);
+        }
+    }
     @PostMapping("/delete")
     @ResponseBody
     @ApiOperation("删除自动化策略")
     public UniversalResponse<?> autoDelete(@RequestParam Integer autoId) {
         try{
             resourceService.automizationDelete(autoId);
+            return new UniversalResponse<>().success();
+        }catch (Exception e){
+            return new UniversalResponse<>().fail(e);
+        }
+
+    }
+    @PostMapping("/deleteGroup")
+    @ResponseBody
+    @ApiOperation("删除规则组策略")
+    public UniversalResponse<?> autogroupDelete(@RequestParam Integer autoGroupId) {
+        try{
+            resourceService.automizationDeleteGroup(autoGroupId);
             return new UniversalResponse<>().success();
         }catch (Exception e){
             return new UniversalResponse<>().fail(e);
@@ -51,7 +76,7 @@ public class AutoController {
     }
     @PostMapping("/select")
     @ResponseBody
-    @ApiOperation("查询自动化策略")
+    @ApiOperation("查询自动启停")
     public UniversalResponse<?> autoSelect(@RequestParam(required = false) String str) {
         try{
             return new UniversalResponse<>().success(resourceService.automizationSelect(str));

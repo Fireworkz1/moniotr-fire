@@ -62,6 +62,9 @@ public class MonitorController {
     @ApiOperation("修改实例")
     public UniversalResponse<?> update(@RequestBody MonitorWithListPojo monitorWithListPojo) {
 
+        if(monitorWithListPojo.getMonitorResourceIds().isEmpty()||monitorWithListPojo.getMonitorGroupIds().isEmpty()){
+            return new UniversalResponse<>(500,"列表不能为空~");
+        }
         try{
             Monitor monitor=new Monitor();
             BeanUtils.copyProperties(monitorWithListPojo,monitor);

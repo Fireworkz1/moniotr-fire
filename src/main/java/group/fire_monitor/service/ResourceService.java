@@ -2,6 +2,7 @@ package group.fire_monitor.service;
 
 import group.fire_monitor.pojo.Auto;
 import group.fire_monitor.pojo.Resource;
+import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
 import group.fire_monitor.util.response.UniversalResponse;
 
@@ -46,6 +47,9 @@ public interface ResourceService {
     UniversalResponse<?> dockerLog(Integer id,Integer lines);
 
     void automizationCreate(Auto auto);
+    void automizationCreateGroup(AutoGroupForm groupForm);
+
+    void automizationDeleteGroup(Integer autoGroupId);
 
     void automizationDelete(Integer autoId);
 
