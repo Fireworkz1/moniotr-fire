@@ -1,9 +1,11 @@
 package group.fire_monitor.service;
 
 import group.fire_monitor.pojo.Auto;
+import group.fire_monitor.pojo.AutoGroup;
 import group.fire_monitor.pojo.Resource;
 import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
+import group.fire_monitor.pojo.res.AutoRes;
 import group.fire_monitor.util.response.UniversalResponse;
 
 import java.util.List;
@@ -46,7 +48,7 @@ public interface ResourceService {
 
     UniversalResponse<?> dockerLog(Integer id,Integer lines);
 
-    void automizationCreate(Auto auto);
+    Integer automizationCreate(Auto auto);
     void automizationCreateGroup(AutoGroupForm groupForm);
 
     void automizationDeleteGroup(Integer autoGroupId);
@@ -56,6 +58,10 @@ public interface ResourceService {
     void automizationModify(Auto auto);
 
     List<Auto> automizationSelect(String str);
+    List<AutoRes> automizationSelectGroupPolicy(Integer groupId);
+    List<AutoGroup> automizationSelectGroup(String str);
 
     void automizationChangeStatus(Integer autoId);
+
+    void automizationChangeGroupStatus(Integer autoGroupId);
 }

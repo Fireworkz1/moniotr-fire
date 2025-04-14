@@ -16,5 +16,7 @@ public class AutoGroup {
     private String autoPolicyIds;
     private String resourceIds;
     private String description;
+    private Integer monitorOn;
+    private Integer masterNodeResourceId;
 
 }

@@ -8,6 +8,7 @@ import group.fire_monitor.mapper.*;
 import group.fire_monitor.pojo.*;
 import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.pojo.form.ResourceCreateForm;
+import group.fire_monitor.pojo.res.AutoRes;
 import group.fire_monitor.pojo.res.ContainerDetailRes;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
 import group.fire_monitor.pojo.res.SoftwareDetailRes;
@@ -19,6 +20,7 @@ import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.JWTUtil;
 import group.fire_monitor.util.enums.PermissionLevelEnum;
 import group.fire_monitor.util.response.UniversalResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -577,11 +580,17 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public void automizationCreate(Auto auto) {
+    public Integer automizationCreate(Auto auto) {
         auto.setModifiedTime(new Date());
         auto.setTriggerTimes(0);
-        auto.setMonitorOn(0);
+        if(auto.getMonitorOn()==null){
+            auto.setMonitorOn(0);
+        }
+        if(auto.getTargetIds()==null|| auto.getTargetIds().isEmpty()){
+            auto.setTargetIds(auto.getResourceId().toString()+",");
+        }
         autoMapper.insert(auto);
+        return auto.getId();
     }
 
     @Override
@@ -589,13 +598,21 @@ public class ResourceServiceImpl implements ResourceService {
         AutoGroup group=new AutoGroup();
         group.setAutoGroupName(groupForm.getAutoGroupName());
         group.setDescription(groupForm.getDescription());
+        if(!groupForm.getResourceIds().contains(groupForm.getMasterNodeResourceId())){
+            groupForm.getResourceIds().add(groupForm.getMasterNodeResourceId());
+        }
         group.setResourceIds(CommonUtil.listToString(groupForm.getResourceIds()));
+        group.setMonitorOn(0);
+        group.setMasterNodeResourceId(groupForm.getMasterNodeResourceId());
         autoGroupMapper.insert(group);
     }
     @Override
     @Transactional
     public void automizationDeleteGroup(Integer autoGroupId) {
-        autoMapper.deleteByIds(CommonUtil.stringToList(autoGroupMapper.selectById(autoGroupId).getAutoPolicyIds()));
+        List<Integer> deleteAutoList=CommonUtil.stringToList(autoGroupMapper.selectById(autoGroupId).getAutoPolicyIds());
+        if(!deleteAutoList.isEmpty()){
+            autoMapper.deleteByIds(deleteAutoList);
+        }
         autoGroupMapper.deleteById(autoGroupId);
     }
     @Override
@@ -614,7 +631,33 @@ public class ResourceServiceImpl implements ResourceService {
         if(str!=null&&!str.isEmpty()){
             return autoMapper.selectList(new QueryWrapper<Auto>().eq("type","self").like("auto_name",str));
         }
-        return autoMapper.selectList(null);
+        return autoMapper.selectList(new QueryWrapper<Auto>().eq("type","self"));
+    }
+
+    @Override
+    public List<AutoRes> automizationSelectGroupPolicy(Integer groupId) {
+        List<Integer> ids=CommonUtil.stringToList(autoGroupMapper.selectById(groupId).getAutoPolicyIds());
+        List<AutoRes> autoResList=new ArrayList<>();
+        if(!ids.isEmpty()){
+            List<Auto> autos=autoMapper.selectBatchIds(ids);
+
+            for(Auto auto:autos){
+                AutoRes res=new AutoRes();
+                BeanUtils.copyProperties(auto,res);
+                res.setTargetIds(CommonUtil.stringToList(auto.getTargetIds()));
+                autoResList.add(res);
+            }
+        }
+
+        return autoResList;
+    }
+
+    @Override
+    public List<AutoGroup> automizationSelectGroup(String str) {
+        if(str!=null&&!str.isEmpty()){
+            return autoGroupMapper.selectList(new QueryWrapper<AutoGroup>().like("auto_group_name",str));
+        }
+        return autoGroupMapper.selectList(null);
     }
 
     @Override
@@ -628,6 +671,27 @@ public class ResourceServiceImpl implements ResourceService {
             auto.setMonitorOn(1);
         }
         autoMapper.updateById(auto);
+    }
+    @Override
+    @Transactional
+    public void automizationChangeGroupStatus(Integer autoGroupId) {
+        AutoGroup group  =autoGroupMapper.selectById(autoGroupId);
+        if(group==null)throw new RuntimeException("无法查询到组");
+        if(group.getMonitorOn()==1){
+            group.setMonitorOn(0);
+        }
+        else if(group.getMonitorOn()==0){
+            group.setMonitorOn(1);
+        }
+        autoGroupMapper.updateById(group);
+        List<Integer> autoIdList=CommonUtil.stringToList(group.getAutoPolicyIds());
+        if(!autoIdList.isEmpty()){
+            List<Auto> autoList=autoMapper.selectList(new QueryWrapper<Auto>().in("id",autoIdList));
+            for(Auto auto:autoList){
+                auto.setMonitorOn(group.getMonitorOn());
+            }
+            autoMapper.updateById(autoList);
+        }
     }
 
     private String getContainerId(Integer id) {
