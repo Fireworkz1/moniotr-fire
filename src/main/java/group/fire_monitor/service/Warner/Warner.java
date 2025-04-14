@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import group.fire_monitor.mapper.*;
 import group.fire_monitor.pojo.*;
 import group.fire_monitor.service.MonitorService;
+import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.service.emailsender.EmailSender;
 import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.enums.WarnNoticeEnum;
@@ -13,10 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.security.Policy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Component
@@ -35,18 +33,72 @@ public class Warner {
     WarnContentMapper warnContentMapper;
     @Autowired
     WarnEntityMapper warnEntityMapper;
+    @Autowired
+    AutoMapper autoMapper;
+    @Autowired
+    ResourceMapper resourceMapper;
+    @Autowired
+    ResourceService resourceService;
 
     private final ExecutorService executorService;
 
     public Warner() {
         // 创建一个固定大小的线程池，大小可以根据需求调整
-        this.executorService = Executors.newFixedThreadPool(1);
+        this.executorService = Executors.newFixedThreadPool(5);
     }
 
 
 
 
-
+    public void checkAuto(){
+        List<Auto> autoList=autoMapper.selectList(new QueryWrapper<Auto>().eq("monitor_on",1));
+        for(Auto auto:autoList){
+            List<Integer> list=new ArrayList<>();
+            list.add(auto.getResourceId());
+            List<PrometheusResult> resultList = monitorService.getAutoData(auto.getMonitorPresetTarget(),list);
+            if (resultList == null) {
+                // 如果获取数据失败，直接忽略本次操作
+                System.out.println("获取监控数据失败，忽略本次操作。");
+                continue;
+            }
+            String flag="安全，无需进行远程控制";
+            for (PrometheusResult result : resultList) {
+                Double value = Double.parseDouble((String) result.getValue().get(1));
+                //判断要不要执行自动操作
+                if (CommonUtil.needToWarn(auto.getCompareType(), value, auto.getWarnThreshold())) {
+                    //过滤掉非docker对象
+                    if(CommonUtil.stringToList(auto.getTargetIds()).isEmpty())break;
+                    List<Resource> resourceList=resourceMapper.selectBatchIds(CommonUtil.stringToList(auto.getTargetIds()));
+                    for(Resource resource:resourceList){
+                        if(!Objects.equals(resource.getStartMode(), "docker")){
+                            resourceList.remove(resource);
+                        }
+                    }
+                    System.out.println("当前指标超过阈值，正在执行自动化操作。autoId="+auto.getId()+",操作为"+auto.getAutoPolicy());
+                    switch (auto.getAutoPolicy()){
+                        case "start":
+                            for(Resource resource:resourceList){
+                                resourceService.startDocker(resource.getId());
+                            }
+                            break;
+                        case "restart":
+                            for(Resource resource:resourceList){
+                                resourceService.restartDocker(resource.getId());
+                            }
+                            break;
+                        case "stop":
+                            for(Resource resource:resourceList){
+                                resourceService.stopDocker(resource.getId());
+                            }
+                            flag="超出阈值，已经对资源进行远程处理："+auto.getAutoPolicy();
+                            break;
+                    }
+                    break;
+                }
+            }
+            System.out.println("autoId="+auto.getId()+"已经完成自动化检查，"+flag);
+        }
+    }
 
     public void warning() {
         List<WarnPolicy> warnTargetList = warnPolicyMapper.selectList(new QueryWrapper<WarnPolicy>().eq("monitor_on", 1));

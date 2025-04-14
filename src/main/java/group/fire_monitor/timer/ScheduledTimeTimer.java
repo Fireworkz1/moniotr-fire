@@ -22,6 +22,16 @@ public class ScheduledTimeTimer {
             e.printStackTrace();
         }
     }
+
+    @Scheduled(fixedRate = 30000)
+    public void checkAuto() {
+        try {
+            System.out.println("当前系统时间：" + new java.util.Date() + "，正在侦测自动化对象...");
+            warner.checkAuto();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Scheduled(fixedRate = 300000)
     public void checkResourceUp(){
         try {
@@ -32,12 +42,4 @@ public class ScheduledTimeTimer {
         }
     }
 
-    @Scheduled(fixedRate = 300000)
-    public void checkAuto(){
-        try {
-           //TODO:完成定时自动化监控逻辑
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 }

@@ -12,6 +12,7 @@ import group.fire_monitor.pojo.res.AutoRes;
 import group.fire_monitor.pojo.res.ContainerDetailRes;
 import group.fire_monitor.pojo.res.HardwareDetailRes;
 import group.fire_monitor.pojo.res.SoftwareDetailRes;
+import group.fire_monitor.service.Warner.Warner;
 import group.fire_monitor.service.docker.DockerManager;
 import group.fire_monitor.service.prometheus.PrometheusQueryExecutor;
 import group.fire_monitor.service.prometheus.PrometheusResponse;
@@ -623,7 +624,9 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public void automizationModify(Auto auto) {
         auto.setModifiedTime(new Date());
+
         autoMapper.updateById(auto);
+
     }
 
     @Override

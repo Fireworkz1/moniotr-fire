@@ -5,6 +5,7 @@ import group.fire_monitor.pojo.Auto;
 import group.fire_monitor.pojo.AutoGroup;
 import group.fire_monitor.pojo.form.AutoGroupForm;
 import group.fire_monitor.pojo.res.AutoRes;
+import group.fire_monitor.service.MonitorService;
 import group.fire_monitor.service.ResourceService;
 import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.response.UniversalResponse;
@@ -22,6 +23,8 @@ public class AutoController {
     private ResourceService resourceService;
     @Autowired
     private AutoGroupMapper autoGroupMapper;
+    @Autowired
+    private MonitorService monitorService;
     @PostMapping("/create")
     @ResponseBody
     @ApiOperation("创建自动化策略")
@@ -70,7 +73,6 @@ public class AutoController {
         }catch (Exception e){
             return new UniversalResponse<>().fail(e);
         }
-
     }
     @PostMapping("/update")
     @ResponseBody

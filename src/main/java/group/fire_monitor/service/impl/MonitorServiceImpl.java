@@ -13,7 +13,6 @@ import group.fire_monitor.service.prometheus.PrometheusQueryExecutor;
 import group.fire_monitor.service.prometheus.PrometheusResponse;
 import group.fire_monitor.util.CommonUtil;
 import group.fire_monitor.util.JWTUtil;
-import group.fire_monitor.pojo.res.MonitorDataRes;
 import group.fire_monitor.util.response.UniversalResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,7 +93,16 @@ public class MonitorServiceImpl implements MonitorService {
             rawResults= getData(monitor.getMonitorPresetTarget(),"table",null,null);
         else
             rawResults= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql())) .getResults();
-        return resultFilter(monitor,rawResults);
+        return resultFilter(CommonUtil.stringToList(monitor.getMonitorResourceIds()),rawResults);
+
+
+    }
+
+    @Override
+    public List<PrometheusResult> getAutoData(String target, List<Integer> resourceIds) {
+        List<PrometheusResult> rawResults;
+            rawResults= getData(target,"table",null,null);
+        return resultFilter(resourceIds,rawResults);
 
 
     }
@@ -106,7 +114,7 @@ public class MonitorServiceImpl implements MonitorService {
             rawResults= getData(monitor.getMonitorPresetTarget(),"graph",startTime,endTime);
         else
             rawResults= prometheusQueryExecutor.executeQuery(prometheusQueryExecutor.custom(monitor.getMonitorNotpresetPromql()),startTime,endTime) .getResults();
-        return resultFilter(monitor,rawResults);
+        return resultFilter(CommonUtil.stringToList(monitor.getMonitorResourceIds()),rawResults);
     }
 
     @Override
@@ -276,9 +284,9 @@ public class MonitorServiceImpl implements MonitorService {
         }
 
     }
-    private List<PrometheusResult> resultFilter(Monitor monitor,List<PrometheusResult> rawResults){
+    private List<PrometheusResult> resultFilter(List<Integer> resourceIdList,List<PrometheusResult> rawResults){
         //TODO：使用redis优化函数运行速度
-        List<Integer> resourceIdList= CommonUtil.stringToList(monitor.getMonitorResourceIds());
+
         List<Resource> resourceList= resourceMapper.selectBatchIds(resourceIdList);
         List<String> instanceList=new ArrayList<>();
         for(Resource resource:resourceList){

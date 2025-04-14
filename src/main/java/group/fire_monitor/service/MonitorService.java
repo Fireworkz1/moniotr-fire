@@ -14,6 +14,9 @@ public interface MonitorService {
     UniversalResponse<?> create(AddMonitorForm form);
 
     List<PrometheusResult> getSingleMonitorData(Monitor monitor);
+
+    List<PrometheusResult> getAutoData(String target, List<Integer> resourceIds);
+
     List<PrometheusResult> getSequenceMonitorData(Monitor monitor, Date startTime, Date endTime);
 
     List<Monitor> selectLike(String str, String type);
