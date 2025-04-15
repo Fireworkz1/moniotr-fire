@@ -10,7 +10,7 @@ import java.io.IOException;
 public class KimiApiResponseParser {
     public static KimiAnalyzeRes parse(String jsonResponse) {
         if (jsonResponse == null) {
-            throw new RuntimeException("未能正确分析数据，请再次请求");
+            throw new RuntimeException("未能正确分析数据，请稍后再次请求");
         }
         ObjectMapper objectMapper = new ObjectMapper();
         try {
