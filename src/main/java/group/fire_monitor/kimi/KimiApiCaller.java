@@ -21,7 +21,7 @@ public class KimiApiCaller {
         // 构建请求数据（JSON 格式）
 
         String jsonPayload = "{"
-                + "\"model\": \"moonshot-v1-8k\","
+                + "\"model\": \"moonshot-v1-32k\","
                 + "\"messages\": ["
                 + "    { \"role\": \"user\", \"content\": \"" + prompt.replace("\n", "\\n") + "\" }"
                 + "]"
