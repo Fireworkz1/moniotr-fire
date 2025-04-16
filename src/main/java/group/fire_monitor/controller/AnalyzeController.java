@@ -62,6 +62,8 @@ public class AnalyzeController {
             String prompt = promptService.getPrometheusAnalyzePrompt(resultList, monitor,resourceList, analyzeForm.getStartTime(), analyzeForm.getEndTime());
             String response = kimiApiCaller.getKimiResponse(prompt);
             KimiAnalyzeRes res = kimiApiResponseParser.parse(response);
+            res.setOptimizationSuggestions("### "+res.getOptimizationSuggestions());
+            res.setTrendPrediction("### "+res.getTrendPrediction());
             return new UniversalResponse<>().success(res);
         } catch (Exception e) {
             return new UniversalResponse<>().fail(e);
