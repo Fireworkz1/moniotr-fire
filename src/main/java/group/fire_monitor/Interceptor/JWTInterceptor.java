@@ -26,7 +26,7 @@ public class JWTInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
+         if (HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
             System.out.println("OPTIONS放行");
             return true;
         }
